@@ -1,0 +1,26 @@
+{
+  "name": "artchat_api",
+  "version": "0.0.1",
+  "description": "ArtChat API",
+  "author": "We",
+  "keywords": [],
+  "license": "MIT",
+  "main": "server.js",
+  "scripts": {
+    "devStart": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ajv": "^7.0.4",
+    "bcrypt": "^5.0.1",
+    "body-parser": "^1.19.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-validator": "^6.9.2",
+    "jsonwebtoken": "^8.5.1",
+    "mongodb": "^3.6.4"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
