@@ -5,7 +5,7 @@ const http = require('http').Server(app);
 const settings = { PORT: process.env.PORT || 4000 };
 
 //  MongoDB
-global.mongoURI = "mongodb+srv://artchat_admin:LEPT6grig!seek9heat@artchat.bsx6x.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+global.mongoURI = "mongodb+srv://artchat_admin:LEPT6grig!seek9heat@artchat.bsx6x.mongodb.net/art_db?retryWrites=true&w=majority";
 
 //  Middleware Headers
 app.use(function (req, res, next) {
