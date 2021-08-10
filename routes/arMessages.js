@@ -34,7 +34,8 @@ router.post('/', [requireJson(), authenticateToken(), checkScheme(messageScheme.
 //  GET w/ Settings
 router.get('/', [checkParameters(), validate()], (req,res) => {
     //  Prepare Parameters for MongoDB Request
-    let sort = typeof req.query.sort === 'undefined' ? {} : { date: req.query.sort };
+    // let sort = typeof req.query.sort === 'undefined' ? {} : { date: req.query.sort };
+    let sort = typeof req.query.sort === 'undefined' ? {} : { _id: req.query.sort };
     let skip = typeof req.query.skip === 'undefined' ? 0 : req.query.skip;
     let limit = typeof req.query.limit === 'undefined' ? 10 : req.query.limit;
     let count = typeof req.query.count === 'undefined' ? null : req.query.count;
