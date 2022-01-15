@@ -47,6 +47,9 @@ app.use('/comment', comment);
 const user = require('./routes/user');
 app.use('/user', user);
 
+// Serve static files
+app.use('/static', require('express').static('static'));
+
 
 //  Start Server
 http.listen(settings.PORT, function(){
