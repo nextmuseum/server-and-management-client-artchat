@@ -50,6 +50,32 @@ app.use('/user', user);
 // Serve static files
 app.use('/static', require('express').static('static'));
 
+// Authentication
+
+const { auth } = require('express-openid-connect');
+
+const config = {
+  authRequired: false,
+  auth0Logout: true,
+  baseURL: 'http://localhost:4000',
+  clientID: 'WxhqMy0ri0qs0PQ3t3wVRPUMdu4wITiU',
+  issuerBaseURL: 'https://nextmuseum-io.eu.auth0.com',
+  secret: 'K10FAa1c:gKu09hwNf9BIKkkAljPrTWx'
+};
+
+// auth router attaches /login, /logout, and /callback routes to the baseURL
+app.use(auth(config));
+
+// req.isAuthenticated is provided from the auth router
+app.get('/loginstatus', (req, res) => {
+  res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out')
+});
+
+const { requiresAuth } = require('express-openid-connect');
+
+app.get('/profile', requiresAuth(), (req, res) => {
+  res.send(JSON.stringify(req.oidc.user));
+});
 
 //  Start Server
 http.listen(settings.PORT, function(){
