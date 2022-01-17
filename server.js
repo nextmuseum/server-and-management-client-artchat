@@ -57,11 +57,15 @@ const { auth } = require('express-openid-connect');
 const config = {
   authRequired: false,
   auth0Logout: true,
-  baseURL: 'http://localhost:4000',
+  baseURL: process.env.APP_HOST || 'http://localhost:4000',
   clientID: 'WxhqMy0ri0qs0PQ3t3wVRPUMdu4wITiU',
   issuerBaseURL: 'https://nextmuseum-io.eu.auth0.com',
   secret: 'K10FAa1c:gKu09hwNf9BIKkkAljPrTWx'
 };
+
+app.get('/config', (req, res) => {
+    res.send(config.baseURL);
+  });
 
 // auth router attaches /login, /logout, and /callback routes to the baseURL
 app.use(auth(config));
