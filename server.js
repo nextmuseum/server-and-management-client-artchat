@@ -81,6 +81,16 @@ app.get('/profile', requiresAuth(), (req, res) => {
   res.send(JSON.stringify(req.oidc.user));
 });
 
+// Read cookies
+
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
+app.get('/cookies', requiresAuth(), (req, res) => {
+    res.send(req.cookies);
+});
+
+
 //  Start Server
 http.listen(settings.PORT, function(){
     console.log('Server running on Port '+ settings.PORT);
