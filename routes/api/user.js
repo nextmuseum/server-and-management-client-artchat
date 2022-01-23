@@ -13,7 +13,7 @@ const { a0management } = require('../../helper/Auth0Manager');
 var ModelTemplate = require('../../models/ModelTemplate');
 var userModel = new ModelTemplate("art_db", "user_col");
 
-router.get('/', isAuthenticated, (req, res) => {
+router.get('/me', isAuthenticated, (req, res) => {
 
 	a0management.getUser({ id: req.user.sub })
 	.then(user => {
