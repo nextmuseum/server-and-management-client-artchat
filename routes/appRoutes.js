@@ -8,7 +8,7 @@ const { a0auth } = require('../helper/Auth0Manager');
 // dedicated login method for unity app login
 router.get('/app-login', (req, res) => {
     res.oidc.login({
-        returnTo: config.baseURL + '/app-token'
+        returnTo: process.env.A0_ISSUER_BASE_URL + '/app-token'
     });
 });
 
