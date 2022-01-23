@@ -40,4 +40,10 @@ router.get('/app-renew-token', async (req, res) => {
 
 })
 
+router.get('/app-logout', (req, res) => {
+    res.oidc.logout({
+        returnTo: process.env.APP_HOST + '/app-login'
+    });
+});
+
 module.exports = router;
