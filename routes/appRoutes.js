@@ -14,8 +14,6 @@ router.get('/app-login', (req, res) => {
 // handle callback and send tokens to app protocol
 router.get('/app-token', requiresAuth(), async (req, res) => {
 
-   
-
     let { access_token, token_type, expires_in } = req.oidc.accessToken;
     let token = { access_token, token_type, expires_in };
     token.refresh_token = req.oidc.refreshToken;
