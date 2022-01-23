@@ -6,14 +6,14 @@ var jwt = require('jsonwebtoken');
 
 const { requireJson, checkID, validate, authenticateToken } = require('../helper/custom-middleware');
 const { requiresAuth } = require('express-openid-connect');
-const ManagementClient = require('../helper/user-management');
+const { a0management } = require('../helper/Auth0Manager');
 
 var ModelTemplate = require('../models/ModelTemplate');
 var userModel = new ModelTemplate("art_db", "user_col");
 
 router.get('/', requiresAuth(), async (req, res) => {
 
-	ManagementClient.getUser({ id: req.oidc.user.sub })
+	a0management.getUser({ id: req.oidc.user.sub })
 	.then(user => {
 		res.json(user);
 	})

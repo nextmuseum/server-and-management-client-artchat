@@ -7,8 +7,8 @@ const http = require('http').Server(app);
 //  Server Port
 const settings = { PORT: process.env.PORT || 4000 };
 
-// Middleware Auth
-const { auth, requiresAuth } = require('express-openid-connect');
+// Middleware Auth0
+const { auth } = require('express-openid-connect');
 
 const config = {
     authRequired: false,
@@ -26,36 +26,6 @@ const config = {
 
 // auth router attaches /login, /logout, and /callback routes to the baseURL
 app.use(auth(config));
-
-app.get('/app-login', (req, res) => {
-    res.oidc.login({
-        returnTo: config.baseURL + '/app-token'
-    });
-});
-
-app.get('/app-token', requiresAuth(), async (req, res) => {
-
-   
-    let { access_token, token_type, expires_in } = req.oidc.accessToken;
-    let token = { access_token, token_type, expires_in };
-    token.refresh_token = req.oidc.refreshToken;
-
-    //res.json(token);
-    res.redirect('unitydl://session?' + new URLSearchParams(token).toString());
-});
-
-app.get('/app-renew-token/:', async (req, res) => {
-
-    let { refresh } = req.oidc.accessToken;
-    
-    try {
-
-    } catch (err) {
-        res.statusCode(500).json(err);
-    }
-
-})
-  
 
 //  Middleware Headers
 app.use(function (req, res, next) {
@@ -88,6 +58,10 @@ app.use(function (error, req, res, next) {
 });
 
 //  Routes
+
+const appRoutes = require('./routes/appRoutes');
+app.use(appRoutes);
+
 const exhibition = require('./routes/exhibition');
 app.use('/exhibition', exhibition);
 const artwork = require('./routes/artwork');
