@@ -11,13 +11,17 @@ const { a0management } = require('../../helper/Auth0Manager');
 
 
 var ModelTemplate = require('../../models/ModelTemplate');
+const { resolveSchema } = require('ajv/dist/compile');
 var userModel = new ModelTemplate("art_db", "user_col");
 
 router.get('/me', isAuthenticated, (req, res) => {
 
+    let mongoData = { app_data: { username : 'Alexander der Große', activity: []}};
+
 	a0management.getUser({ id: req.user.sub })
 	.then(user => {
-		res.json(user);
+        let userObject = {... user, ... mongoData};
+		res.json(userObject);
 	})
 	.catch(err => console.log(JSON.stringify(err)));
 
