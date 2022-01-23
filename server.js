@@ -36,11 +36,12 @@ app.get('/app-login', (req, res) => {
 app.get('/app-token', requiresAuth(), async (req, res) => {
 
    
-    let token = req.oidc.accessToken;
+    let { access_token, token_type, expires_in } = req.oidc.accessToken;
+    let token = { access_token, token_type, expires_in };
     token.refresh_token = req.oidc.refreshToken;
 
     //res.json(token);
-    res.redirect('unitydl://' + JSON.stringify(token));
+    res.redirect('unitydl://session?' + new URLSearchParams(token).toString());
 });
 
 app.get('/app-renew-token/:', async (req, res) => {
