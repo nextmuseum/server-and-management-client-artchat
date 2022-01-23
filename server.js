@@ -8,7 +8,7 @@ const http = require('http').Server(app);
 const settings = { PORT: process.env.PORT || 4000 };
 
 // Middleware Auth
-const { auth } = require('express-openid-connect');
+const { auth, requiresAuth } = require('express-openid-connect');
 
 const config = {
     authRequired: false,
@@ -19,7 +19,8 @@ const config = {
     clientID: process.env.A0_CLIENT_ID,
     clientSecret: process.env.A0_CLIENT_SECRET,
     authorizationParams: {
-        response_type: 'code id_token'
+        response_type: 'code id_token',
+        scope: 'openid profile email offline_access'
     }
 };
 
@@ -28,9 +29,31 @@ app.use(auth(config));
 
 app.get('/app-login', (req, res) => {
     res.oidc.login({
-        returnTo: 'unitydl://session'
+        returnTo: config.baseURL + '/app-token'
     });
 });
+
+app.get('/app-token', requiresAuth(), async (req, res) => {
+
+   
+    let token = req.oidc.accessToken;
+    token.refresh_token = req.oidc.refreshToken;
+
+    //res.json(token);
+    res.redirect('unitydl://' + JSON.stringify(token));
+});
+
+app.get('/app-renew-token/:', async (req, res) => {
+
+    let { refresh } = req.oidc.accessToken;
+    
+    try {
+
+    } catch (err) {
+        res.statusCode(500).json(err);
+    }
+
+})
   
 
 //  Middleware Headers
