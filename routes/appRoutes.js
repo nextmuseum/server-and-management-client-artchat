@@ -4,11 +4,10 @@ var router = express.Router();
 const { requiresAuth } = require('express-openid-connect');
 const { a0auth } = require('../helper/Auth0Manager');
 
-
 // dedicated login method for unity app login
 router.get('/app-login', (req, res) => {
     res.oidc.login({
-        returnTo: process.env.A0_ISSUER_BASE_URL + '/app-token'
+        returnTo: process.env.APP_HOST + '/app-token'
     });
 });
 
@@ -16,10 +15,12 @@ router.get('/app-login', (req, res) => {
 router.get('/app-token', requiresAuth(), async (req, res) => {
 
    
+
     let { access_token, token_type, expires_in } = req.oidc.accessToken;
     let token = { access_token, token_type, expires_in };
     token.refresh_token = req.oidc.refreshToken;
 
+	//res.json(token);
     res.redirect('unitydl://session?' + new URLSearchParams(token).toString());
 });
 

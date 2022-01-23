@@ -3,9 +3,13 @@ require('dotenv').config();
 const app = require('express')();
 const http = require('http').Server(app);
 
+// Inject access tokens
+const expressAccessToken = require('express-access-token');
+app.use(expressAccessToken);
 
 //  Server Port
 const settings = { PORT: process.env.PORT || 4000 };
+
 
 // Middleware Auth0
 const { auth } = require('express-openid-connect');
