@@ -13,7 +13,7 @@ module.exports = class ModelTemplate {
         newItem._id = ObjectID();
         newItem.date = newItem._id.getTimestamp();
     
-        MongoClient.connect(mongoURI, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
+        MongoClient.connect(process.env.MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
             if(err){
                 console.log("MongoDB Connection Error:\n",err);
                 return callback(null);
@@ -33,7 +33,7 @@ module.exports = class ModelTemplate {
 
     getBySettings(settings, sort, skip, limit, callback){
         let thisDB = this.databaseName, thisCol = this.collectionName;
-        MongoClient.connect(mongoURI, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
+        MongoClient.connect(process.env.MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
             if(err){
                 console.log("MongoDB Connection Error:\n",err);
                 return callback(null);
@@ -58,7 +58,7 @@ module.exports = class ModelTemplate {
         let thisDB = this.databaseName, thisCol = this.collectionName;
         let settings = {"_id": ObjectID(id)};
     
-        MongoClient.connect(mongoURI, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
+        MongoClient.connect(process.env.MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
             if(err){
                 console.log("MongoDB Connection Error:\n",err);
                 return callback(null);
@@ -78,7 +78,7 @@ module.exports = class ModelTemplate {
 
     getCountAll(settings, callback){
         let thisDB = this.databaseName, thisCol = this.collectionName;
-        MongoClient.connect(mongoURI, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
+        MongoClient.connect(process.env.MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
             if(err){
                 console.log("MongoDB Connection Error:\n",err);
                 return callback(null);
@@ -100,7 +100,7 @@ module.exports = class ModelTemplate {
         let thisDB = this.databaseName, thisCol = this.collectionName;
         let settings = {"_id": ObjectID(id)};
     
-        MongoClient.connect(mongoURI, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
+        MongoClient.connect(process.env.MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
             if(err){
                 console.log("MongoDB Connection Error:\n",err);
                 return callback(null);
@@ -127,7 +127,7 @@ module.exports = class ModelTemplate {
             update.$set[key] = value;
         }
     
-        MongoClient.connect(mongoURI, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
+        MongoClient.connect(process.env.MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
             if(err){
                 console.log("MongoDB Connection Error:\n",err);
                 return callback(null);
@@ -150,7 +150,7 @@ module.exports = class ModelTemplate {
         let settings = {"_id": ObjectID(id)};
         if(matchSettings != null) settings[match] = matchSettings;
 
-        MongoClient.connect(mongoURI, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
+        MongoClient.connect(process.env.MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
             if(err){
                 console.log("MongoDB Connection Error:\n",err);
                 return callback(null);

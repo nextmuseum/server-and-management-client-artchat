@@ -5,12 +5,31 @@ var bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
 
 const { requireJson, checkID, validate, authenticateToken } = require('../helper/custom-middleware');
+const { requiresAuth } = require('express-openid-connect');
+const ManagementClient = require('../helper/user-management');
 
 var ModelTemplate = require('../models/ModelTemplate');
 var userModel = new ModelTemplate("art_db", "user_col");
 
+router.get('/', requiresAuth(), async (req, res) => {
+
+	ManagementClient.getUser({ id: req.oidc.user.sub })
+	.then(user => {
+		res.json(user);
+	})
+	.catch(err => console.log(JSON.stringify(err)));
+
+});
+
+router.put('/', requiresAuth(), (req, res) => {
+
+})
+
+module.exports = router;
+
+
 //  GET
-router.get('/', (req,res) => {
+/* router.get('/', (req,res) => {
     userModel.getBySettings({},{},0,10, (response) => {
         if(!response){
             res.status(404).end();
@@ -20,7 +39,7 @@ router.get('/', (req,res) => {
         }
     });
 });
-
+ */
 //  GET
 router.get('/:objectid', [checkID(), validate()], (req,res) => {
     userModel.getByID(req.params.objectid, (response) => {

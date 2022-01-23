@@ -9,7 +9,7 @@ exports.create = function(newArtwork, callback){
     newArtwork._id = ObjectID();
     newArtwork.date = newArtwork._id.getTimestamp();
 
-    MongoClient.connect(mongoURI, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
+    MongoClient.connect(process.env.MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
         if(err){
             console.log("MongoDB Connection Error:\n",err);
             return callback(null);
@@ -28,7 +28,7 @@ exports.create = function(newArtwork, callback){
 }
 
 exports.getBySettings = function(settings, sort, skip, limit, callback){
-    MongoClient.connect(mongoURI, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
+    MongoClient.connect(process.env.MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
         if(err){
             console.log("MongoDB Connection Error:\n",err);
             return callback(null);
@@ -52,7 +52,7 @@ exports.getBySettings = function(settings, sort, skip, limit, callback){
 exports.getByID = function(id, callback){
     let settings = {"_id": ObjectID(id)};
 
-    MongoClient.connect(mongoURI, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
+    MongoClient.connect(process.env.MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
         if(err){
             console.log("MongoDB Connection Error:\n",err);
             return callback(null);
@@ -71,7 +71,7 @@ exports.getByID = function(id, callback){
 }
 
 exports.getCountAll = function(settings, callback){
-    MongoClient.connect(mongoURI, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
+    MongoClient.connect(process.env.MONGO_URI, {useNewUrlParser: true, useUnifiedTopology: true}, function(err, client) {
         if(err){
             console.log("MongoDB Connection Error:\n",err);
             return callback(null);

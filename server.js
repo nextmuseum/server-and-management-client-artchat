@@ -1,11 +1,37 @@
+require('dotenv').config();
+
 const app = require('express')();
 const http = require('http').Server(app);
+
 
 //  Server Port
 const settings = { PORT: process.env.PORT || 4000 };
 
-//  MongoDB
-global.mongoURI = "mongodb+srv://artchat_admin:LEPT6grig!seek9heat@artchat.bsx6x.mongodb.net/art_db?retryWrites=true&w=majority";
+// Middleware Auth
+const { auth } = require('express-openid-connect');
+
+const config = {
+    authRequired: false,
+    auth0Logout: true,
+    baseURL: process.env.APP_HOST,
+    secret: process.env.A0_SECRET,
+    issuerBaseURL: process.env.A0_ISSUER_BASE_URL,
+    clientID: process.env.A0_CLIENT_ID,
+    clientSecret: process.env.A0_CLIENT_SECRET,
+    authorizationParams: {
+        response_type: 'code id_token'
+    }
+};
+
+// auth router attaches /login, /logout, and /callback routes to the baseURL
+app.use(auth(config));
+
+app.get('/app-login', (req, res) => {
+    res.oidc.login({
+        returnTo: 'unitydl://session'
+    });
+});
+  
 
 //  Middleware Headers
 app.use(function (req, res, next) {
@@ -49,47 +75,6 @@ app.use('/user', user);
 
 // Serve static files
 app.use('/static', require('express').static('static'));
-
-// Authentication
-
-const { auth } = require('express-openid-connect');
-
-const config = {
-  authRequired: false,
-  auth0Logout: true,
-  baseURL: process.env.APP_HOST || 'http://localhost:4000',
-  clientID: 'WxhqMy0ri0qs0PQ3t3wVRPUMdu4wITiU',
-  issuerBaseURL: 'https://nextmuseum-io.eu.auth0.com',
-  secret: 'K10FAa1c:gKu09hwNf9BIKkkAljPrTWx'
-};
-
-app.get('/config', (req, res) => {
-    res.send(config.baseURL);
-  });
-
-// auth router attaches /login, /logout, and /callback routes to the baseURL
-app.use(auth(config));
-
-// req.isAuthenticated is provided from the auth router
-app.get('/loginstatus', (req, res) => {
-  res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out')
-});
-
-const { requiresAuth } = require('express-openid-connect');
-
-app.get('/profile', requiresAuth(), (req, res) => {
-  res.send(JSON.stringify(req.oidc.user));
-});
-
-// Read cookies
-
-const cookieParser = require('cookie-parser');
-app.use(cookieParser());
-
-app.get('/cookies', requiresAuth(), (req, res) => {
-    res.send(req.cookies);
-});
-
 
 //  Start Server
 http.listen(settings.PORT, function(){
