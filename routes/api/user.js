@@ -4,16 +4,16 @@ var router = express.Router();
 var bcrypt = require('bcrypt');
 var jwt = require('jsonwebtoken');
 
-const { requireJson, checkID, validate, authenticateToken } = require('../helper/custom-middleware');
-const { isAuthenticated } = require('../helper/custom-auth-middleware');
+const { requireJson, checkID, validate, authenticateToken } = require('../../helper/custom-middleware');
+const { isAuthenticated } = require('../../helper/custom-auth-middleware');
 const { requiresAuth } = require('express-openid-connect');
-const { a0management } = require('../helper/Auth0Manager');
+const { a0management } = require('../../helper/Auth0Manager');
 
 
-var ModelTemplate = require('../models/ModelTemplate');
+var ModelTemplate = require('../../models/ModelTemplate');
 var userModel = new ModelTemplate("art_db", "user_col");
 
-router.get('/', isAuthenticated(), (req, res) => {
+router.get('/', isAuthenticated, (req, res) => {
 
 	a0management.getUser({ id: req.user.sub })
 	.then(user => {

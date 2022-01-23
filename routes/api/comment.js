@@ -2,25 +2,27 @@ var express = require('express');
 var router = express.Router();
 
 //  Custom Middleware
-const { requireJson, checkScheme, checkID, validate, checkParameters, authenticateToken } = require('../helper/custom-middleware');
+const { requireJson, checkScheme, checkID, validate, checkParameters, authenticateToken } = require(__basedir + '/helper/custom-middleware');
+
+const { requiresAuth } = require('express-openid-connect');
+
 
 //  JSON Comment Scheme for Validation
-var messageScheme = require('../schemes/arMessages');
+var commentScheme = require(__basedir + '/schemes/comment');
 //  Comment Model for MongoDB Access
 //  var commentModel = require('../models/comment');
-var ModelTemplate = require('../models/ModelTemplate');
-var arMessageModel = new ModelTemplate("art_db", "arMessages_col");
+var ModelTemplate = require(__basedir + '/models/ModelTemplate');
+var commentModel = new ModelTemplate("art_db", "comment_col");
 
 //  POST
-router.post('/', [requireJson(), authenticateToken(), checkScheme(messageScheme.POST)], (req,res) => {
+router.post('/', [requireJson(), requiresAuth(), checkScheme(commentScheme.POST)], (req,res) => {
     //  Prepare Body
-    let newArMessage = req.body;
-    newArMessage.artworkID = req.artworkID;
-    newArMessage.userID = req.userID;
-    newArMessage.commentID = req.commentID;
+    let newComment = req.body;
+    newComment.artworkID = req.artworkID;
+    newComment.userID = req.oidc.user.sub;
 
     //  Create Comment
-    arMessageModel.create(newArMessage, (response) => {
+    commentModel.create(newComment, (response) => {
         if(!response) {
             res.status(500).end();
             return;
@@ -39,12 +41,11 @@ router.get('/', [checkParameters(), validate()], (req,res) => {
     let skip = typeof req.query.skip === 'undefined' ? 0 : req.query.skip;
     let limit = typeof req.query.limit === 'undefined' ? 10 : req.query.limit;
     let count = typeof req.query.count === 'undefined' ? null : req.query.count;
-    // let settings = typeof req.artworkID === 'undefined' || req.artworkID.length === 0 ? {} : {"artworkID": { "$in": [req.artworkID] }};
-    let settings = typeof req.commentID === 'undefined' || req.commentID.length === 0 ? {} : {"commentID": { "$in": [req.commentID] }};
+    let settings = typeof req.artworkID === 'undefined' || req.artworkID.length === 0 ? {} : {"artworkID": { "$in": [req.artworkID] }};
 
     //  Request Comment Count
     if(count){
-        arMessageModel.getCountAll( settings, (response) => {
+        commentModel.getCountAll( settings, (response) => {
             if(!response){
                 res.status(500).end();
                 return;
@@ -55,7 +56,7 @@ router.get('/', [checkParameters(), validate()], (req,res) => {
     }
 
     //  Get Comment with Settings
-    arMessageModel.getBySettings(settings, sort, skip, limit, (response) => {
+    commentModel.getBySettings(settings, sort, skip, limit, (response) => {
         if(!response){
             res.status(500).end();
             return;
@@ -68,7 +69,7 @@ router.get('/', [checkParameters(), validate()], (req,res) => {
 
 //  GET w/ ID
 router.get('/:objectid', [checkID(), validate()],(req,res) => {
-    arMessageModel.getByID(req.params.objectid, (response) => {
+    commentModel.getByID(req.params.objectid, (response) => {
         if(!response){
             res.status(404).end();
             return;
@@ -82,7 +83,7 @@ router.get('/:objectid', [checkID(), validate()],(req,res) => {
 router.delete('/:objectid', [checkID(), validate(), authenticateToken()], async (req,res) => {
     await IsAuthor(req.params.objectid, req.userID).catch(() => {res.status(401).end();})
 
-    arMessageModel.deleteByID(req.params.objectid, (response) => {
+    commentModel.deleteByID(req.params.objectid, (response) => {
         if(!response){
             res.status(404).end();
             return;
@@ -93,10 +94,10 @@ router.delete('/:objectid', [checkID(), validate(), authenticateToken()], async 
 });
 
 // PUT w/ ID
-router.put('/:objectid', [checkID(), validate(), authenticateToken(), checkScheme(messageScheme.PUT)], async (req,res) => {
+router.put('/:objectid', [checkID(), validate(), authenticateToken(), checkScheme(commentScheme.PUT)], async (req,res) => {
     await IsAuthor(req.params.objectid, req.userID).catch(() => {res.status(401).end();})
     
-    arMessageModel.updateByID(req.params.objectid, req.body, (response) => {
+    commentModel.updateByID(req.params.objectid, req.body, (response) => {
         if(!response){
             res.status(404).end();
             return;
@@ -106,9 +107,9 @@ router.put('/:objectid', [checkID(), validate(), authenticateToken(), checkSchem
     });
 });
 
-function IsAuthor(messageID, userID){
+function IsAuthor(commentID, userID){
     return new Promise((resolve, reject) => {
-        arMessageModel.getByID(messageID, (response) => {
+        commentModel.getByID(commentID, (response) => {
             if(!response) reject(new Error("Comment not found"));
             else{
                 if(response.userID == userID) resolve();
@@ -117,5 +118,13 @@ function IsAuthor(messageID, userID){
         });
     });
 }
+
+//  Sub Route Comment
+const arMessage = require('./arMessages');
+router.use('/:objectid/arMessages', [checkID(), validate()], (req, res, next) => {
+    // req.artworkID = req.params.objectid;
+    req.commentID = req.params.objectid;
+    next();
+}, arMessage);
 
 module.exports = router;

@@ -2,13 +2,13 @@ var express = require('express');
 var router = express.Router();
 
 //  Custom Middleware
-const { requireJson, checkScheme, checkID, validate } = require('../helper/custom-middleware');
+const { requireJson, checkScheme, checkID, validate } = require(__basedir + '/helper/custom-middleware');
 
 //  JSON Comment Scheme for Validation
-var artworkScheme = require('../schemes/artwork');
+var artworkScheme = require(__basedir + '/schemes/artwork');
 //  Comment Model for MongoDB Access
 //  var artworkModel = require('../models/artwork');
-var ModelTemplate = require('../models/ModelTemplate');
+var ModelTemplate = require(__basedir + '/models/ModelTemplate');
 var artworkModel = new ModelTemplate("art_db", "artwork_col");
 
 //  POST

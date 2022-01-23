@@ -1,4 +1,5 @@
 require('dotenv').config();
+global.__basedir = __dirname;
 
 const app = require('express')();
 const http = require('http').Server(app);
@@ -10,26 +11,6 @@ app.use(expressAccessToken);
 //  Server Port
 const settings = { PORT: process.env.PORT || 4000 };
 
-
-// Middleware Auth0
-const { auth } = require('express-openid-connect');
-
-const config = {
-    authRequired: false,
-    auth0Logout: true,
-    baseURL: process.env.APP_HOST,
-    secret: process.env.A0_SECRET,
-    issuerBaseURL: process.env.A0_ISSUER_BASE_URL,
-    clientID: process.env.A0_CLIENT_ID,
-    clientSecret: process.env.A0_CLIENT_SECRET,
-    authorizationParams: {
-        response_type: 'code id_token',
-        scope: 'openid profile email offline_access'
-    }
-};
-
-// auth router attaches /login, /logout, and /callback routes to the baseURL
-app.use(auth(config));
 
 //  Middleware Headers
 app.use(function (req, res, next) {
@@ -61,24 +42,20 @@ app.use(function (error, req, res, next) {
     else next();
 });
 
-//  Routes
+// Routes:
 
+// Unity auth handler
 const appRoutes = require('./routes/appRoutes');
 app.use(appRoutes);
 
-const exhibition = require('./routes/exhibition');
-app.use('/exhibition', exhibition);
-const artwork = require('./routes/artwork');
-app.use('/artwork', artwork);
-const comment = require('./routes/comment');
-app.use('/comment', comment);
-const user = require('./routes/user');
-app.use('/user', user);
+// API routes
+const apiRoutes = require('./routes/apiRoutes');
+app.use('/api', apiRoutes);
 
 // Serve static files
 app.use('/static', require('express').static('static'));
 
-//  Start Server
+// Start Server
 http.listen(settings.PORT, function(){
     console.log('Server running on Port '+ settings.PORT);
 });

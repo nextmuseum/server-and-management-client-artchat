@@ -2,12 +2,12 @@ var express = require('express');
 var router = express.Router();
 
 //  Custom Middleware
-const { requireJson, checkScheme, checkID, validate } = require('../helper/custom-middleware');
+const { requireJson, checkScheme, checkID, validate } = require(__basedir + '/helper/custom-middleware');
 
 //  JSON Exhibition Scheme for Validation
-var exhibitionScheme = require('../schemes/exhibition');
+var exhibitionScheme = require(__basedir + '/schemes/exhibition');
 //  Exhibition Model for MongoDB Access
-var ModelTemplate = require('../models/ModelTemplate');
+var ModelTemplate = require(__basedir + '/models/ModelTemplate');
 var exhibitionModel = new ModelTemplate("art_db", "exhibition_col");
 
 //  POST

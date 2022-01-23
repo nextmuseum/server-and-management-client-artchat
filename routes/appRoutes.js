@@ -4,6 +4,32 @@ var router = express.Router();
 const { requiresAuth } = require('express-openid-connect');
 const { a0auth } = require('../helper/Auth0Manager');
 
+// Middleware Auth0
+const { auth } = require('express-openid-connect');
+
+const config = {
+    authRequired: false,
+    auth0Logout: true,
+    baseURL: process.env.APP_HOST,
+    secret: process.env.A0_SECRET,
+    issuerBaseURL: process.env.A0_ISSUER_BASE_URL,
+    clientID: process.env.A0_CLIENT_ID,
+    clientSecret: process.env.A0_CLIENT_SECRET,
+    authorizationParams: {
+        response_type: 'code id_token',
+        scope: 'openid profile email offline_access',
+		audience: process.env.A0_API_IDENTIFIER
+    }
+};
+
+// auth router attaches /login, /logout, and /callback routes to the baseURL
+router.use(auth(config));
+
+
+router.get('/userinfo', (req, res) => {
+	res.json(req.oidc.user);
+})
+
 // dedicated login method for unity app login
 router.get('/app-login', (req, res) => {
     res.oidc.login({
@@ -18,7 +44,7 @@ router.get('/app-token', requiresAuth(), async (req, res) => {
     let token = { access_token, token_type, expires_in };
     token.refresh_token = req.oidc.refreshToken;
 
-	//res.json(token);
+	return res.json(token);
     res.redirect('unitydl://session?' + new URLSearchParams(token).toString());
 });
 
