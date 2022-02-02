@@ -44,7 +44,7 @@ router.get('/forward-token', requiresAuth(), async (req, res) => {
     let token = { access_token, token_type, expires_in }
     token.refresh_token = req.oidc.refreshToken
 
-	return res.json(token)
+	//return res.json(token)
     res.redirect('unitydl://session?' + new URLSearchParams(token).toString())
 })
 
