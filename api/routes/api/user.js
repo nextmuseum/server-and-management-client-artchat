@@ -39,7 +39,7 @@ router.get('/:userId', validateInjectAuthUser(), async (req,res) => {
     let validAuthUser = req.authUser
     let validAuthUserId = req.authUser.user_id.split('|')[1] // auth0|7a6sd576a5s6d75 get last bit
 
-    GetUserByUserId(validAuthUserId)
+    GetUserByAuthId(validAuthUserId)
     .then(response => {
         validAuthUser.app_data = response
     })
@@ -57,7 +57,7 @@ router.put('/:userId', [validateInjectAuthUser(), injectUserTokenIntoBody(), che
     let validAuthUserId = req.authUser.user_id.split('|')[1] // auth0|7a6sd576a5s6d75 get last bit
     if (req.params.userId != validAuthUserId) res.status(403).send()
 
-    await GetUserByAuthId(validAuthUserId)
+    await GetUserByUserId(validAuthUserId)
     .then(response => {
         return res.status(405).json({"error": `user metadata for user id ${validAuthUserId} already exist`})
     })
@@ -88,7 +88,7 @@ router.patch('/:userId', [validateInjectAuthUser(), injectUserTokenIntoBody(), c
 
     let objectId = ""
     
-    await GetUserByAuthId(validAuthUserId)
+    await GetUserByUserId(validAuthUserId)
     .then(response => {
         if (!response) res.status(405).json({"error": `user metadata for user id ${validAuthUserId} does not exist`})
         objectId = response_id
@@ -189,7 +189,7 @@ function GetUserByName(username){
     })
 }
 
-function GetUserByAuthId(authId){
+function GetUserByUserId(authId){
     return new Promise((resolve, reject) => {
         
         let settings = {"userId": { "$in": [authId] }}
