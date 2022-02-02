@@ -24,9 +24,11 @@
     "express-oauth2-jwt-bearer": "^1.1.0",
     "express-openid-connect": "^2.5.2",
     "express-validator": "^6.9.2",
+    "helmet": "^5.0.2",
     "jsonwebtoken": "^8.5.1",
     "jwks-rsa": "^2.0.5",
-    "mongodb": "^3.6.4"
+    "mongodb": "^3.6.4",
+    "morgan": "^1.10.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.7"

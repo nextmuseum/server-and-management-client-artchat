@@ -1,7 +1,7 @@
 module.exports = {
-    POST: {
-        "title": "POST Exhibition",
-        "description": "POST Exhibition Body Scheme",
+    PUT: {
+        "title": "PUT Exhibition",
+        "description": "PUT Exhibition Body Schema",
         "type": "object",
         "properties": {
             "title": {"type":"string"},

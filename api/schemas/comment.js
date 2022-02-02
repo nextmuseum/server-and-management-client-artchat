@@ -1,10 +1,12 @@
 module.exports = {
-    POST: {
-        "title": "POST Message",
-        "description": "POST Message Body Scheme",
+    PUT: {
+        "title": "PUT Comment",
+        "description": "Create Comment Body Schema",
         "type": "object",
         "properties": {
             "text": {"type": "string"},
+            "userId": {"type": "string"},
+            "artworkId": {"type": "string"},
             "position":
             {
                 "title": "Vector3 Position",
@@ -30,15 +32,17 @@ module.exports = {
                 "required" : ["x","y","z"]
             }
         },
-        "required" : ["text","position","rotation"],
+        "required" : ["text","position","rotation","artworkId","commentId"],
         "additionalProperties": false
     },
-    PUT: {
-        "title": "PUT Message",
-        "description": "PUT Message Body Scheme",
+    PATCH: {
+        "title": "PATCH Comment",
+        "description": "Update Comment Body Schema",
         "type": "object",
         "properties": {
             "text": {"type": "string"},
+            "commentId": {"type": "string"},
+            "userId": {"type": "string"},
             "position":
             {
                 "title": "Vector3 Position",
@@ -64,7 +68,7 @@ module.exports = {
                 "required" : ["x","y","z"]
             }
         },
-        "required" : [],
+        "required" : ["text","commentId"],
         "additionalProperties": false
     }
 }

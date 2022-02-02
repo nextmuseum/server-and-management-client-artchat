@@ -1,7 +1,7 @@
 module.exports = {
-    POST: {
-        "title": "POST Artwork",
-        "description": "POST Artwork Body Scheme",
+    PUT: {
+        "title": "PUT Artwork",
+        "description": "Create Artwork Body Schema",
         "type": "object",
         "properties": {
             "artist": {"type":"string"},
@@ -9,9 +9,9 @@ module.exports = {
             "description": {"type":"string"},
             "year": {"type":"string"},
             "imageSrc": {"type":"string"},
-            "mapID": {"type": "number"}
+            "mapId": {"type": "number"}
         },
-        "required" : ["title", "artist", "description", "mapID"],
+        "required" : ["title", "artist", "description", "mapId"],
         "additionalProperties": false
     }
 }
