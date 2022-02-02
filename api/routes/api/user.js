@@ -10,7 +10,6 @@ var userSchema = require(__basedir + '/schemas/user')
 var userModel = new _modelTemplate("users")
 
 
-
 // Pseudo endpoints for easier access
 
 router.get('/me',  (req, res) => {
@@ -20,17 +19,18 @@ router.get('/me',  (req, res) => {
 
 })
 
-router.patch('/me', (req, res) => {    
+router.patch('/me/appdata', (req, res) => {    
 
     let authId = req.user.sub.split('|')[1]
-    res.redirect(307, './' + authId)
+    res.redirect(307, '../' + authId + '/appdata')
 
 })
 
-router.put('/me', (req, res) => {    
+router.put('/me/appdata', (req, res) => {    
 
+    console.log("me app data triggered")
     let authId = req.user.sub.split('|')[1]
-    res.redirect(307, './' + authId)
+    res.redirect(307, '../' + authId + '/appdata')
 
 })
 
@@ -39,9 +39,9 @@ router.get('/:userId', validateInjectAuthUser(), async (req,res) => {
     let validAuthUser = req.authUser
     let validAuthUserId = req.authUser.user_id.split('|')[1] // auth0|7a6sd576a5s6d75 get last bit
 
-    GetUserByUserId(validAuthUserId)
+    await GetUserByUserId(validAuthUserId)
     .then(response => {
-        validAuthUser.app_data = response
+        validAuthUser.appdata = response
     })
     .catch(err => {
         //console.log(JSON.stringify(err))
@@ -52,14 +52,18 @@ router.get('/:userId', validateInjectAuthUser(), async (req,res) => {
 	
 })
 
-router.put('/:userId', [validateInjectAuthUser(), injectUserTokenIntoBody(), checkSchema(userSchema.PUT)], async (req,res) => {
+router.put('/:userId/appdata', [validateInjectAuthUser(), injectUserTokenIntoBody(), checkSchema(userSchema.PUT)], async (req,res) => {
+
+
+    console.log("user id app data triggered")
+
 
     let validAuthUserId = req.authUser.user_id.split('|')[1] // auth0|7a6sd576a5s6d75 get last bit
     if (req.params.userId != validAuthUserId) res.status(403).send()
 
     await GetUserByUserId(validAuthUserId)
     .then(response => {
-        return res.status(405).json({"error": `user metadata for user id ${validAuthUserId} already exist`})
+        return res.status(405).json({"error": `user appdata for user id ${validAuthUserId} already exist`})
     })
     .catch(err => {
         // user does not exist, continue
@@ -81,7 +85,7 @@ router.put('/:userId', [validateInjectAuthUser(), injectUserTokenIntoBody(), che
 
 })
 
-router.patch('/:userId', [validateInjectAuthUser(), injectUserTokenIntoBody(), checkSchema(userSchema.PATCH)], async (req,res) => {
+router.patch('/:userId/appdata', [validateInjectAuthUser(), injectUserTokenIntoBody(), checkSchema(userSchema.PATCH)], async (req,res) => {
 
     let validAuthUserId = req.authUser.user_id.split('|')[1] 
     if (req.params.userId != validAuthUserId) res.status(403).send()
@@ -90,7 +94,7 @@ router.patch('/:userId', [validateInjectAuthUser(), injectUserTokenIntoBody(), c
     
     await GetUserByUserId(validAuthUserId)
     .then(response => {
-        if (!response) res.status(405).json({"error": `user metadata for user id ${validAuthUserId} does not exist`})
+        if (!response) res.status(405).json({"error": `user appdata for user id ${validAuthUserId} does not exist`})
         objectId = response_id
     })
     .catch(err => {
