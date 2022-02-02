@@ -63,24 +63,24 @@ router.put('/:userId/appdata', [validateInjectAuthUser(), injectUserTokenIntoBod
 
     await GetUserByUserId(validAuthUserId)
     .then(response => {
-        return res.status(405).json({"error": `user appdata for user id ${validAuthUserId} already exist`})
+        return res.status(405).json({"error": `user appdata for user id ${validAuthUserId} already exist`}).end()
     })
     .catch(err => {
         // user does not exist, continue
         
+        let user = req.body
+
+        userModel.create(user, (response, err) => {
+            if (err)
+                res.status(500).json(err)
+            if(response == null){
+                res.status(200).json({result: 'no records were updated'}).end()
+            }else{
+                res.status(204).end()
+            }
+        })
+
         console.log(JSON.stringify(err))
-    })
-
-    let user = req.body
-
-    userModel.create(user, (response, err) => {
-        if (err)
-            res.status(500).json(err)
-        if(response == null){
-            res.status(200).json({result: 'no records were updated'}).end()
-        }else{
-            res.status(204).end()
-        }
     })
 
 })
