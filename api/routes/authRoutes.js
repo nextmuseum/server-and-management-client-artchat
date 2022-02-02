@@ -68,7 +68,7 @@ router.get('/renew-token', async (req, res) => {
 
 router.get('/logout-unity', (req, res) => {
     res.oidc.logout({
-        returnTo: process.env.APP_HOST + '/app/login-unity'
+        returnTo: process.env.APP_HOST + '/auth/login-unity'
     })
 })
 
