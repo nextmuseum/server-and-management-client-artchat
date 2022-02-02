@@ -39,7 +39,7 @@ router.get('/:userId', validateInjectAuthUser(), async (req,res) => {
     let validAuthUser = req.authUser
     let validAuthUserId = req.authUser.user_id.split('|')[1] // auth0|7a6sd576a5s6d75 get last bit
 
-    GetUserByAuthId(validAuthUserId)
+    GetUserByUserId(validAuthUserId)
     .then(response => {
         validAuthUser.app_data = response
     })
