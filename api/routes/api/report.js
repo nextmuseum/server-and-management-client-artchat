@@ -43,4 +43,32 @@ router.get('/:objectId', [checkId(), validate()], (req,res) => {
     })
 })
 
+
+router.delete('/:objectId', [checkId(), validate()], async (req,res) => {
+    await IsAuthor(req.params.objectId, req.user.sub).catch(() => {res.status(401).end()})
+
+    reportStore.deleteById(req.params.objectId, (response) => {
+        if(!response){
+            res.status(404).end()
+            return
+        }else{
+            res.status(204).end()
+        }
+    })
+})
+
+
+function IsAuthor(messageId, userId){
+    return new Promise((resolve, reject) => {
+        reportStore.getById(messageId, (response) => {
+            if(!response) reject(new Error("Comment not found"))
+            else{
+                if(response.userId == userId) resolve()
+                else reject(new Error("Is not the author"))
+            }
+        })
+    })
+}
+
+
 module.exports = router

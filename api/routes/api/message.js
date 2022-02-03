@@ -2,6 +2,7 @@ var express = require('express')
 var router = express.Router()
 
 const { requireJson, checkSchema, checkId, validate, checkParameters, authenticateToken } = require(__basedir + '/helper/custom-middleware')
+const { injectUserTokenIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
 
 var messageSchema = require(__basedir + '/schemas/message')
 
@@ -68,15 +69,11 @@ router.delete('/:objectId', [checkId(), validate()], async (req,res) => {
 })
 
 
-router.put('/', [requireJson(), checkSchema(messageSchema.PUT)], (req,res) => {
+router.put('/', [requireJson(), injectUserTokenIntoBody(), checkSchema(messageSchema.PUT)], (req,res) => {
     
-    let newArMessage = req.body
-    newArMessage.artworkId = req.artworkId
-    newArMessage.userId = req.userId
-    newArMessage.commentId = req.commentId
-
+    let newMessage = req.body
    
-    messageStore.create(newArMessage, (response) => {
+    messageStore.create(newMessage, (response) => {
         if(!response) {
             res.status(500).end()
             return
@@ -87,8 +84,8 @@ router.put('/', [requireJson(), checkSchema(messageSchema.PUT)], (req,res) => {
 })
 
 
-router.put('/:objectId', [checkId(), validate(), checkSchema(messageSchema.PUT)], async (req,res) => {
-    await IsAuthor(req.params.objectId, req.user.sub).catch(() => {res.status(401).end()})
+router.patch('/:objectId', [checkId(), validate(),  checkSchema(messageSchema.PATCH)], async (req,res) => {
+    await IsAuthor(req.params.objectId, req.body.userId).catch(() => {res.status(401).end()})
     
     messageStore.updateById(req.params.objectId, req.body, (response) => {
         if(!response){

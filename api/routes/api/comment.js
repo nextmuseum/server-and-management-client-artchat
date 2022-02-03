@@ -2,18 +2,19 @@ var express = require('express')
 var router = express.Router()
 
 const { requireJson, checkSchema, checkId, validate, checkParameters, authenticateToken } = require(__basedir + '/helper/custom-middleware')
+const { isAuthenticated } = require(__basedir + '/helper/custom-auth-middleware')
 
 const commentSchema = require(__basedir + '/schemas/comment')
 
 const _modelTemplate = require(__basedir + '/models/_modelTemplate')
-const commentModel = new _modelTemplate("comments")
+const commentStore = new _modelTemplate("comments")
 
 router.put('/', [requireJson(), checkSchema(commentSchema.PUT)], (req,res) => {
     //  Prepare Body
     let newComment = req.body
 
     //  Create Comment
-    commentModel.create(newComment, (response) => {
+    commentStore.create(newComment, (response) => {
         if(!response) {
             res.status(500).end()
             return
@@ -34,7 +35,7 @@ router.get('/', [checkParameters(), validate()], (req,res) => {
 
     //  Request Comment Count
     if(count){
-        commentModel.getCountAll( settings, (response) => {
+        commentStore.getCountAll( settings, (response) => {
             if(!response){
                 res.status(500).end()
                 return
@@ -45,7 +46,7 @@ router.get('/', [checkParameters(), validate()], (req,res) => {
     }
 
     //  Get Comment with Settings
-    commentModel.getBySettings(settings, sort, skip, limit, (response) => {
+    commentStore.getBySettings(settings, sort, skip, limit, (response) => {
         if(!response){
             res.status(500).end()
             return
@@ -58,7 +59,7 @@ router.get('/', [checkParameters(), validate()], (req,res) => {
 
 
 router.get('/:objectId', [checkId(), validate()],(req,res) => {
-    commentModel.getById(req.params.objectId, (response) => {
+    commentStore.getById(req.params.objectId, (response) => {
         if(!response){
             res.status(404).end()
             return
@@ -72,7 +73,7 @@ router.get('/:objectId', [checkId(), validate()],(req,res) => {
 router.delete('/:objectId', [checkId(), validate()], async (req,res) => {
     await IsAuthor(req.params.objectId, req.user.sub).catch(() => {res.status(401).end()})
 
-    commentModel.deleteById(req.params.objectId, (response) => {
+    commentStore.deleteById(req.params.objectId, (response) => {
         if(!response){
             res.status(404).end()
             return
@@ -86,7 +87,7 @@ router.delete('/:objectId', [checkId(), validate()], async (req,res) => {
 router.put('/:objectId', [checkId(), validate(), checkSchema(commentSchema.PUT)], async (req,res) => {
     await IsAuthor(req.params.objectId, req.user.sub).catch(() => {res.status(401).end()})
     
-    commentModel.updateById(req.params.objectId, req.body, (response) => {
+    commentStore.updateById(req.params.objectId, req.body, (response) => {
         if(!response){
             res.status(404).end()
             return
@@ -98,7 +99,7 @@ router.put('/:objectId', [checkId(), validate(), checkSchema(commentSchema.PUT)]
 
 function IsAuthor(commentId, userId){
     return new Promise((resolve, reject) => {
-        commentModel.getById(commentId, (response) => {
+        commentStore.getById(commentId, (response) => {
             if(!response) reject(new Error("Comment not found"))
             else{
                 if(response.userId == userId) resolve()
