@@ -15,7 +15,7 @@ var userModel = new _modelTemplate("users")
 router.get('/me',  (req, res) => {
 
     let authId = req.user.sub.split('|')[1]
-    res.redirect('./' + authId)
+    res.redirect(307, './' + authId)
 
 })
 
@@ -118,17 +118,17 @@ router.patch('/:userId/appdata', [validateInjectAuthUser(), injectUserTokenIntoB
 
 
 //  ADD Artwork/Exhibition
-router.patch('/:objectId/activity', [requireJson(), checkId(), validate(), authenticateToken()], async(req,res) => {
+router.patch('/:userId/activity', [requireJson(), validateInjectAuthUser(), injectUserTokenIntoBody(), checkId(), validate()], async(req,res) => {
     
-    if(req.params.objectId != req.userId) return res.status(401).send()
+    if(req.params.userId != req.body.userId) return res.status(401).send()
 
-    const user = await GetUserByObjectId(req.params.objectId).catch(() => {res.status(400).end()})
+    const user = await GetUserByUserId(req.params.userId).catch(() => {res.status(400).end()})
 
     const foundEntry = user.activity.find(el => el.exhibitionId == req.body.exhibitionId)
 
     if(foundEntry == null){
         await AddUniqueEntry(
-            req.params.objectId,
+            user._id,
             null,
             null,
             {$addToSet: {"activity": { "exhibitionId": req.body.exhibitionId}}}
@@ -136,7 +136,7 @@ router.patch('/:objectId/activity', [requireJson(), checkId(), validate(), authe
     }
 
     await AddUniqueEntry(
-        req.params.objectId,
+        user._id,
         "activity",
         {$elemMatch: {"exhibitionId": req.body.exhibitionId}},
         {$addToSet: {"activity.$.artwork": req.body.artwork}}
@@ -146,11 +146,11 @@ router.patch('/:objectId/activity', [requireJson(), checkId(), validate(), authe
 })
 
 //  GET Artwork/Exhibition
-router.get('/:objectId/activity', [checkId(), validate()], async(req,res) => {
+router.get('/:userId/activity', [validate()], async(req,res) => {
 
-    const activityList = await GetUserExhibitionsByObjectId(req.params.objectId).catch(() => res.status(401).end() )
+    const activity = await GetUserExhibitionsByUserId(req.params.userId).catch(() => res.status(401).end() )
 
-    res.json(activityList).send()
+    res.json(activity).send()
 })
 
 function AddUniqueEntry(userId, match, matchSettings, settings){
@@ -193,10 +193,10 @@ function GetUserByName(username){
     })
 }
 
-function GetUserByUserId(authId){
+function GetUserByUserId(userId){
     return new Promise((resolve, reject) => {
         
-        let settings = {"userId": { "$in": [authId] }}
+        let settings = {"userId": { "$in": [userId] }}
         
         userModel.getBySettings(settings,{},0,10, (response) => {
 
@@ -217,14 +217,17 @@ function GetUserByObjectId(objectId){
     })
 }
 
-function GetUserExhibitionsByObjectId(objectId){
+function GetUserExhibitionsByUserId(userId){
     return new Promise((resolve, reject) => {
-        userModel.getById(objectId, (response) => {
-            if(!response) reject(new Error("User not found"))
-            else {
-                if (response.activity == null) resolve([])
-                else resolve( response.activity )
-            }
+
+        let settings = {"userId": { "$in": [userId] }}
+
+        userModel.getBySettings(settings,{},0,10,  (response) => {
+
+            if(!response || response.length == 0) reject(new Error("User not found"))
+            
+            resolve( response[0].activity )
+        
         })
     })
 }
