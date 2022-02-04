@@ -6,10 +6,13 @@ module.exports = {
         "properties": {
             "messageId": {"type":"string"},
             "commentId": {"type":"string"},
-            "userId": {"type":"array"}
+            "userId": {"type":"string"}
         },
         "required": ["userId"],
-        "oneOf": ["messageId", "commentId"],
+        "oneOf": [
+            { required: [ "messageId"] },
+            { required: [ "commentId"] }
+        ],
         "additionalProperties": false
     }
 }

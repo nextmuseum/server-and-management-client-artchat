@@ -1,7 +1,7 @@
 var express = require('express')
 var router = express.Router()
 
-const { requireJson, checkSchema, checkId, validate, checkParameters, authenticateToken } = require(__basedir + '/helper/custom-middleware')
+const { requireJson, checkSchema, checkId, validate, checkParameters } = require(__basedir + '/helper/custom-middleware')
 const { injectUserTokenIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
 
 var messageSchema = require(__basedir + '/schemas/message')

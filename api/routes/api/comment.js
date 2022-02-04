@@ -1,15 +1,15 @@
 var express = require('express')
 var router = express.Router()
 
-const { requireJson, checkSchema, checkId, validate, checkParameters, authenticateToken } = require(__basedir + '/helper/custom-middleware')
-const { isAuthenticated } = require(__basedir + '/helper/custom-auth-middleware')
+const { requireJson, checkSchema, checkId, validate, checkParameters } = require(__basedir + '/helper/custom-middleware')
+const { injectUserTokenIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
 
 const commentSchema = require(__basedir + '/schemas/comment')
 
 const _modelTemplate = require(__basedir + '/models/_modelTemplate')
 const commentStore = new _modelTemplate("comments")
 
-router.put('/', [requireJson(), checkSchema(commentSchema.PUT)], (req,res) => {
+router.put('/', [requireJson(), injectUserTokenIntoBody(), checkSchema(commentSchema.PUT)], (req,res) => {
     //  Prepare Body
     let newComment = req.body
 
@@ -71,7 +71,12 @@ router.get('/:objectId', [checkId(), validate()],(req,res) => {
 
 
 router.delete('/:objectId', [checkId(), validate()], async (req,res) => {
-    await IsAuthor(req.params.objectId, req.user.sub).catch(() => {res.status(401).end()})
+    
+    try {
+        await IsAuthor(req.params.objectId, req.body.userId)
+    } catch (err) {
+        return res.status(401).json(err.toString()).end()
+    }
 
     commentStore.deleteById(req.params.objectId, (response) => {
         if(!response){
@@ -84,9 +89,14 @@ router.delete('/:objectId', [checkId(), validate()], async (req,res) => {
 })
 
 
-router.put('/:objectId', [checkId(), validate(), checkSchema(commentSchema.PUT)], async (req,res) => {
-    await IsAuthor(req.params.objectId, req.user.sub).catch(() => {res.status(401).end()})
-    
+router.patch('/:objectId', [checkId(), validate(), injectUserTokenIntoBody(), checkSchema(commentSchema.PATCH)], async (req,res) => {
+
+    try {
+        await IsAuthor(req.params.objectId, req.body.userId)
+    } catch (err) {
+        return res.status(401).json(err.toString()).end()
+    }
+
     commentStore.updateById(req.params.objectId, req.body, (response) => {
         if(!response){
             res.status(404).end()

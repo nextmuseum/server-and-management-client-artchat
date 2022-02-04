@@ -59,7 +59,7 @@ router.put('/:userId/appdata', [validateInjectAuthUser(), injectUserTokenIntoBod
 
 
     let validAuthUserId = req.authUser.user_id.split('|')[1] // auth0|7a6sd576a5s6d75 get last bit
-    if (req.params.userId != validAuthUserId) res.status(403).send()
+    if (req.params.userId != validAuthUserId) return res.status(403).send()
 
     await GetUserByUserId(validAuthUserId)
     .then(response => {
@@ -88,7 +88,7 @@ router.put('/:userId/appdata', [validateInjectAuthUser(), injectUserTokenIntoBod
 router.patch('/:userId/appdata', [validateInjectAuthUser(), injectUserTokenIntoBody(), checkSchema(userSchema.PATCH)], async (req,res) => {
 
     let validAuthUserId = req.authUser.user_id.split('|')[1] 
-    if (req.params.userId != validAuthUserId) res.status(403).send()
+    if (req.params.userId != validAuthUserId) return res.status(403).send()
 
     let objectId = ""
     
@@ -122,7 +122,7 @@ router.patch('/:userId/activity', [requireJson(), validateInjectAuthUser(), inje
     
     if(req.params.userId != req.body.userId) return res.status(401).send()
 
-    const user = await GetUserByUserId(req.params.userId).catch(() => {res.status(400).end()})
+    const user = await GetUserByUserId(req.params.userId).catch(() => {return res.status(400).end()})
 
     const foundEntry = user.activity.find(el => el.exhibitionId == req.body.exhibitionId)
 
@@ -148,7 +148,7 @@ router.patch('/:userId/activity', [requireJson(), validateInjectAuthUser(), inje
 //  GET Artwork/Exhibition
 router.get('/:userId/activity', [validate()], async(req,res) => {
 
-    const activity = await GetUserExhibitionsByUserId(req.params.userId).catch(() => res.status(401).end() )
+    const activity = await GetUserExhibitionsByUserId(req.params.userId).catch(() => {return res.status(401).end() })
 
     res.json(activity).send()
 })

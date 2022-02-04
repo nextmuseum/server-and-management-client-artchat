@@ -2,6 +2,8 @@ var express = require('express')
 var router = express.Router()
 
 const { requireJson, checkSchema, checkId, validate } = require(__basedir + '/helper/custom-middleware')
+const { injectUserTokenIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
+
 
 var reportSchema = require(__basedir + '/schemas/report')
 
@@ -9,7 +11,14 @@ var _modelTemplate = require(__basedir + '/models/_modelTemplate')
 var reportStore = new _modelTemplate("reports")
 
 
-router.put('/', [requireJson(), checkSchema(reportSchema.PUT)], (req,res) => {
+router.put('/', [requireJson(), injectUserTokenIntoBody(), checkSchema(reportSchema.PUT)], async (req,res) => {
+    
+    let reportedObjectId = req.body.commentId || req.body.messageId;
+    try {
+        await reportedObjectIsUniqueForUser( reportedObjectId, req.body.userId)
+    } catch (err) {
+        return res.status(409).json(err.toString()).end()
+    }
     
     reportStore.create(req.body, (response) => {
         if(!response) {
@@ -58,9 +67,38 @@ router.delete('/:objectId', [checkId(), validate()], async (req,res) => {
 })
 
 
-function IsAuthor(messageId, userId){
+function reportedObjectIsUniqueForUser(reportedObjectId, userId){
+    console.log(reportedObjectId);
+    console.log(userId);
+
     return new Promise((resolve, reject) => {
-        reportStore.getById(messageId, (response) => {
+        let settings = {
+            $and : [
+                {
+                    $or : [
+                        { "commentId": { "$in": [reportedObjectId] } },
+                        { "messageId": { "$in": [reportedObjectId] } }
+                    ]
+                },
+                { "userId": { "$in": [userId] } 
+            }]
+            
+        };
+
+        reportStore.getBySettings(settings,{},0,10, (response) => {
+            
+            if(response.length > 0 )
+                reject(new Error(`Object ${reportedObjectId} already exists for user ${userId}`))
+            resolve() 
+            
+        })
+    })
+}
+
+
+function IsAuthor(commentId, userId){
+    return new Promise((resolve, reject) => {
+        commentStore.getById(commentId, (response) => {
             if(!response) reject(new Error("Comment not found"))
             else{
                 if(response.userId == userId) resolve()
