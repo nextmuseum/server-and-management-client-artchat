@@ -54,19 +54,13 @@ router.get('/:userId', validateInjectAuthUser(), async (req,res) => {
 
 router.put('/:userId/appdata', [validateInjectAuthUser(), injectUserTokenIntoBody(), checkSchema(userSchema.PUT)], async (req,res) => {
 
-
-    console.log("user id app data triggered")
-
-
     let validAuthUserId = req.authUser.user_id.split('|')[1] // auth0|7a6sd576a5s6d75 get last bit
     if (req.params.userId != validAuthUserId) return res.status(403).send()
 
     await GetUserByUserId(validAuthUserId)
     .then(response => {
-        return res.status(405).json({"error": `user appdata for user id ${validAuthUserId} already exist`}).end()
-    })
-    .catch(err => {
-        // user does not exist, continue
+        if (response != null)
+            return res.status(405).json({"error": `user appdata for user id ${validAuthUserId} already exist`}).end()
         
         let user = req.body
 
@@ -80,7 +74,11 @@ router.put('/:userId/appdata', [validateInjectAuthUser(), injectUserTokenIntoBod
             }
         })
 
-        console.log(JSON.stringify(err))
+    })
+    .catch(err => {
+        // user does not exist, continue
+        return res.status(500).json(err.toString()).end()
+
     })
 
 })
@@ -198,11 +196,11 @@ function GetUserByUserId(userId){
         
         let settings = {"userId": { "$in": [userId] }}
         
-        userModel.getBySettings(settings,{},0,10, (response) => {
+        userModel.getBySettings(settings,{},0,10, (response, err) => {
 
-            if(!response || response.length == 0) reject(new Error("User not found"))
-
+            if(!response || response.length == 0) resolve(null)
             resolve(response[0])
+            reject(new Error(err))
             
         })
     })
