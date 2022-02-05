@@ -107,7 +107,7 @@ router.get('/:objectId', [checkId(), validate()], async (req,res) => {
 })
 
 
-router.delete('/:objectId', [checkId(), validate()], async (req,res) => {
+router.delete('/:objectId', [checkId(), injectUserTokenIntoBody(),  validate()], async (req,res) => {
     
     try {
         let isAuthor = await matchAuthor(req.params.objectId, req.body.userId, messageStore)
