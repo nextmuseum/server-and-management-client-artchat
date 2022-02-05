@@ -9,49 +9,83 @@ var messageSchema = require(__basedir + '/schemas/message')
 var _modelTemplate = require(__basedir + '/models/_modelTemplate')
 var messageStore = new _modelTemplate("messages")
 
-router.get('/', [checkParameters(), validate()], (req,res) => {
+const { getReports } = require("./report")
+
+router.get('/', [checkParameters(), validate()], async (req,res) => {
     //  Prepare Parameters for MongoDB Request
     // let sort = typeof req.query.sort === 'undefined' ? {} : { date: req.query.sort }
     let sort = typeof req.query.sort === 'undefined' ? {} : { _id: req.query.sort }
     let skip = typeof req.query.skip === 'undefined' ? 0 : req.query.skip
     let limit = typeof req.query.limit === 'undefined' ? 10 : req.query.limit
-    let count = typeof req.query.count === 'undefined' ? null : req.query.count
-    // let settings = typeof req.artworkId === 'undefined' || req.artworkId.length === 0 ? {} : {"artworkId": { "$in": [req.artworkId] }}
-    let settings = typeof req.commentId === 'undefined' || req.commentId.length === 0 ? {} : {"commentId": { "$in": [req.commentId] }}
-
-    //  Request Comment Count
-    if(count){
-        messageStore.getCountAll( settings, (response) => { 
-            if(!response){
-                res.status(500).end()
-                return
-            }
-            else res.status(200).set("Content-Type", 'application/json').json(response).end()
-        })
-        return
-    }
+    
+    let settings = typeof req.body.commentId === 'undefined' || req.body.commentId.length === 0 ? {} : {"commentId": { "$in": [req.commentId] }}
 
     //  Get Comment with Settings
-    messageStore.getBySettings(settings, sort, skip, limit, (response) => {
-        if(!response){
-            res.status(500).end()
-            return
-        }
-    
-        else res.status(200).set("Content-Type", 'application/json').json(response).end()
-    })
+    let messages
+
+    try {
+        messages = await new Promise((resolve, reject) => {
+            messages = messageStore.getBySettings(settings, sort, skip, limit, (response, err) => {
+                if (response)
+                    resolve(response)
+                if (response == null)
+                    resolve(null)
+        
+                reject(err)
+            })
+        })
+    } catch (err) {
+        return res.status(500).json(JSON.stringify(err)).end()
+    }
+
+    // collect message ids 
+    let messageIds = messages.reduce((p, c) => {
+        p.push(c._id.toString())
+        return p
+    }, [])
+
+    // query reports
+    let reports = await getReports(messageIds)
+
+    // merge messages and reports
+    let mergedReports = messages.reduce((i, c) => {
+        let message = c
+        message.reports = reports.filter((rep) => {
+            return message._id == rep.messageId
+        })
+        i.push(c)
+        return i
+    }, [])
+
+    res.status(200).set("Content-Type", 'application/json').json(mergedReports).end()
 })
 
 
-router.get('/:objectId', [checkId(), validate()],(req,res) => {
-    messageStore.getById(req.params.objectId, (response) => {
-        if(!response){
-            res.status(404).end()
-            return
-        }else{
-            res.status(200).set("Content-Type", 'application/json').json(response).end()
-        }
-    })
+router.get('/:objectId', [checkId(), validate()], async (req,res) => {
+    let objectId = req.params.objectId;
+
+    let response
+    try {
+        response = await new Promise((resolve, reject) => {
+            messageStore.getById(objectId, (response, err) => {
+                if (response)
+                    resolve(response)
+                if (response == null)
+                    resolve(null)
+        
+                reject(err)
+            })
+        })
+    } catch (err) {
+        return res.status(500).json(JSON.stringify(err)).end()
+    }
+    
+    if(!response){
+        return res.status(404).end()
+    }else{
+        let enrichedResponse = await injectReports(response);
+        res.status(200).set("Content-Type", 'application/json').json(enrichedResponse).end()
+    }
 })
 
 
@@ -109,6 +143,13 @@ function IsAuthor(messageId, userId){
             }
         })
     })
+}
+
+async function injectReports(response) {
+    let reports = await getReports(response._id.toString())
+    let enrichedResponse = Object.assign(response, { "reports":  [...reports] })
+
+    return enrichedResponse
 }
 
 const report = require('./report')

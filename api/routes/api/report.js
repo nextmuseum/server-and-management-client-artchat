@@ -13,11 +13,16 @@ var reportStore = new _modelTemplate("reports")
 
 router.put('/', [requireJson(), injectUserTokenIntoBody(), checkSchema(reportSchema.PUT)], async (req,res) => {
     
-    let reportedObjectId = req.body.commentId || req.body.messageId;
     try {
-        await reportedObjectIsUniqueForUser( reportedObjectId, req.body.userId)
+        let reportedObjectId = req.body.commentId || req.body.messageId
+        let reportUserId = req.body.userId
+        let isUniqueReport = await reportedObjectIsUniqueForUser( reportedObjectId, reportUserId )
+        
+        if (!isUniqueReport)
+            return res.status(409).json({"error": `comment/message ${reportedObjectId} report already exists for user ${reportUserId}`}).end()
+        
     } catch (err) {
-        return res.status(409).json(err.toString()).end()
+        return res.status(500).json(err.toString()).end()
     }
     
     reportStore.create(req.body, (response) => {
@@ -30,15 +35,19 @@ router.put('/', [requireJson(), injectUserTokenIntoBody(), checkSchema(reportSch
     })
 })
 
-router.get('/', (req,res) => {
-    reportStore.getBySettings({},{},0,10, (response) => {
-        if(!response){
-            res.status(404).end()
-            return
-        }else{
-            res.status(200).set("Content-Type", 'application/json').json(response).end()
-        }
-    })
+router.get('/', async (req,res) => {
+
+    let reportedObjectId = req.query.reportedObjectId;
+
+    const response = await getReports(reportedObjectId);
+
+    if(!response){
+        res.status(404).end()
+        return
+    }else{
+        res.status(200).set("Content-Type", 'application/json').json({"count": response.length, "data": [...response]}).end()
+    }
+    
 })
 
 router.get('/:objectId', [checkId(), validate()], (req,res) => {
@@ -54,7 +63,12 @@ router.get('/:objectId', [checkId(), validate()], (req,res) => {
 
 
 router.delete('/:objectId', [checkId(), validate()], async (req,res) => {
-    await IsAuthor(req.params.objectId, req.user.sub).catch(() => {res.status(401).end()})
+    
+    try {
+        await IsAuthor(req.params.objectId, req.body.userId)
+    } catch (err) {
+        return res.status(401).json(err.toString()).end()
+    }
 
     reportStore.deleteById(req.params.objectId, (response) => {
         if(!response){
@@ -68,8 +82,6 @@ router.delete('/:objectId', [checkId(), validate()], async (req,res) => {
 
 
 function reportedObjectIsUniqueForUser(reportedObjectId, userId){
-    console.log(reportedObjectId);
-    console.log(userId);
 
     return new Promise((resolve, reject) => {
         let settings = {
@@ -85,11 +97,14 @@ function reportedObjectIsUniqueForUser(reportedObjectId, userId){
             
         };
 
-        reportStore.getBySettings(settings,{},0,10, (response) => {
+        reportStore.getBySettings(settings,{},0,10, (response, err) => {
             
-            if(response.length > 0 )
-                reject(new Error(`Object ${reportedObjectId} already exists for user ${userId}`))
-            resolve() 
+            if(response && response.length == 0 ) 
+                resolve(true)
+            else if (response && response.length > 0 )
+                resolve(false)
+
+            reject(err)
             
         })
     })
@@ -98,7 +113,7 @@ function reportedObjectIsUniqueForUser(reportedObjectId, userId){
 
 function IsAuthor(commentId, userId){
     return new Promise((resolve, reject) => {
-        commentStore.getById(commentId, (response) => {
+        reportStore.getById(commentId, (response) => {
             if(!response) reject(new Error("Comment not found"))
             else{
                 if(response.userId == userId) resolve()
@@ -108,5 +123,28 @@ function IsAuthor(commentId, userId){
     })
 }
 
+function getReports(reportedObjectIds) {
+    
+    // ad-hoc polymorphism *.*
+    let reportedObjectIdQuery = (typeof reportedObjectIds == 'string') ? [reportedObjectIds] : reportedObjectIds;
+
+    return new Promise((resolve, reject) => {
+        let query = {
+            $or : [
+                { "commentId": { "$in": reportedObjectIdQuery } },
+                { "messageId": { "$in": reportedObjectIdQuery } }
+            ]
+        }
+
+        reportStore.getBySettings(query,{},0,10, (response, err) => {
+
+            if (response)
+                resolve(response)
+            reject(err)
+        })
+    })
+}
+
 
 module.exports = router
+module.exports.getReports = getReports

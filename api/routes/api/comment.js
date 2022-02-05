@@ -9,6 +9,8 @@ const commentSchema = require(__basedir + '/schemas/comment')
 const _modelTemplate = require(__basedir + '/models/_modelTemplate')
 const commentStore = new _modelTemplate("comments")
 
+const { getReports } = require("./report")
+
 router.put('/', [requireJson(), injectUserTokenIntoBody(), checkSchema(commentSchema.PUT)], (req,res) => {
     //  Prepare Body
     let newComment = req.body
@@ -58,15 +60,33 @@ router.get('/', [checkParameters(), validate()], (req,res) => {
 })
 
 
-router.get('/:objectId', [checkId(), validate()],(req,res) => {
-    commentStore.getById(req.params.objectId, (response) => {
-        if(!response){
-            res.status(404).end()
-            return
-        }else{
-            res.status(200).set("Content-Type", 'application/json').json(response).end()
-        }
-    })
+router.get('/:objectId', [checkId(), validate()], async (req,res) => {
+
+    let objectId = req.params.objectId;
+
+    let response
+    
+    try {
+        response = await new Promise((resolve, reject) => {
+            commentStore.getById(objectId, (response, err) => {
+                if (response)
+                    resolve(response)
+                if (response == null)
+                    resolve(null)
+        
+                reject(err)
+            })
+        })
+    } catch (err) {
+        return res.status(500).json(JSON.stringify(err)).end()
+    }
+
+    if(response == null){
+        return res.status(404).end()
+    }else{
+        let enrichedResponse = await injectReports(response);
+        res.status(200).set("Content-Type", 'application/json').json(enrichedResponse).end()
+    }
 })
 
 
@@ -87,7 +107,6 @@ router.delete('/:objectId', [checkId(), validate()], async (req,res) => {
         }
     })
 })
-
 
 router.patch('/:objectId', [checkId(), validate(), injectUserTokenIntoBody(), checkSchema(commentSchema.PATCH)], async (req,res) => {
 
@@ -118,6 +137,14 @@ function IsAuthor(commentId, userId){
         })
     })
 }
+
+async function injectReports(response) {
+    let reports = await getReports(response._id.toString())
+    let enrichedResponse = Object.assign(response, { "reports": [...reports] })
+
+    return enrichedResponse
+}
+
 
 //  Sub Route Comment
 const message = require('./message')
