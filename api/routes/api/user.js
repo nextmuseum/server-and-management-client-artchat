@@ -2,7 +2,7 @@ require('dotenv').config()
 var express = require('express')
 var router = express.Router()
 
-const { requireJson, checkSchema, checkId, validate, authenticateToken } = require(__basedir + '/helper/custom-middleware')
+const { requireJson, checkSchema, checkId, checkUserId, validate, authenticateToken } = require(__basedir + '/helper/custom-middleware')
 const { injectUserTokenIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
 
 var _modelTemplate = require(__basedir + '/models/_modelTemplate')
@@ -116,7 +116,7 @@ router.post('/:userId/appdata', [validateInjectAuthUser(), injectUserTokenIntoBo
 
 
 //  ADD Artwork/Exhibition
-router.post('/:userId/activity', [requireJson(), validateInjectAuthUser(), injectUserTokenIntoBody(), checkId(), validate()], async(req,res) => {
+router.post('/:userId/activity', [requireJson(), validateInjectAuthUser(), injectUserTokenIntoBody(), checkUserId(), validate()], async(req,res) => {
     
     if(req.params.userId != req.body.userId) return res.status(401).send()
 
