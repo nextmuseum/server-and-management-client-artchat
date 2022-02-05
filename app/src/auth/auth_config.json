@@ -1,0 +1,7 @@
+{
+	"domain": "nextmuseum-io.eu.auth0.com",
+	"client_id": "WxhqMy0ri0qs0PQ3t3wVRPUMdu4wITiU",
+	"redirect_uri": "http://localhost:8080/callback",
+	"cacheLocation": "localstorage",
+	"useRefreshTokens": true
+}
