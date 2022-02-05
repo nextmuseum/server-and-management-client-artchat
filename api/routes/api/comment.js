@@ -26,14 +26,14 @@ router.put('/', [requireJson(), injectUserTokenIntoBody(), checkSchema(commentSc
     })
 })
 
-router.get('/', [checkParameters(), validate()], (req,res) => {
+router.get('/', [checkParameters(), validate()], async (req,res) => {
     //  Prepare Parameters for MongoDB Request
     // let sort = typeof req.query.sort === 'undefined' ? {} : { date: req.query.sort }
     let sort = typeof req.query.sort === 'undefined' ? {} : { _id: req.query.sort }
     let skip = typeof req.query.skip === 'undefined' ? 0 : req.query.skip
     let limit = typeof req.query.limit === 'undefined' ? 10 : req.query.limit
     let count = typeof req.query.count === 'undefined' ? null : req.query.count
-    let settings = typeof req.artworkId === 'undefined' || req.artworkId.length === 0 ? {} : {"artworkId": { "$in": [req.artworkId] }}
+    let settings = typeof req.body.artworkId === 'undefined' || req.body.artworkId.length === 0 ? {} : {"artworkId": { "$in": [req.body.artworkId] }}
 
     //  Request Comment Count
     if(count){
@@ -48,15 +48,46 @@ router.get('/', [checkParameters(), validate()], (req,res) => {
     }
 
     //  Get Comment with Settings
-    commentStore.getBySettings(settings, sort, skip, limit, (response) => {
-        if(!response){
-            res.status(500).end()
-            return
-        }
+    let comments
+
+    try {
+        comments = await new Promise((resolve, reject) => {
+            comments = commentStore.getBySettings(settings, sort, skip, limit, (response, err) => {
+                if (response)
+                    resolve(response)
+                if (response == null)
+                    resolve(null)
         
-        if(response.length === 0) res.status(404).end()
-        else res.status(200).set("Content-Type", 'application/json').json(response).end()
-    })
+                reject(err)
+            })
+        })
+    } catch (err) {
+        return res.status(500).json(JSON.stringify(err)).end()
+    }
+
+    if(comments.length == 0) return res.status(404).end()
+
+    // collect message ids 
+    let messageIds = comments.reduce((p, c) => {
+        p.push(c._id.toString())
+        return p
+    }, [])
+
+    // query reports
+    let reports = await getReports(messageIds)
+
+    // merge messages and reports
+    let mergedReports = comments.reduce((i, c) => {
+        let comment = c
+        comment.reports = reports.filter((rep) => {
+            return comment._id == rep.commentId
+        })
+        i.push(c)
+        return i
+    }, [])
+
+    
+    res.status(200).set("Content-Type", 'application/json').json(mergedReports).end()
 })
 
 

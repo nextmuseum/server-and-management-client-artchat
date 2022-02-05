@@ -17,10 +17,22 @@ router.get('/', [checkParameters(), validate()], async (req,res) => {
     let sort = typeof req.query.sort === 'undefined' ? {} : { _id: req.query.sort }
     let skip = typeof req.query.skip === 'undefined' ? 0 : req.query.skip
     let limit = typeof req.query.limit === 'undefined' ? 10 : req.query.limit
-    
-    let settings = typeof req.body.commentId === 'undefined' || req.body.commentId.length === 0 ? {} : {"commentId": { "$in": [req.commentId] }}
+    let count = typeof req.query.count === 'undefined' ? null : req.query.count
+    let settings = typeof req.body.commentId === 'undefined' || req.body.commentId.length === 0 ? {} : {"commentId": { "$in": [req.body.commentId] }}
 
-    //  Get Comment with Settings
+    //  Request Message Count
+    if(count){
+        messageStore.getCountAll( settings, (response, err) => {
+            if(!response){
+                res.status(500).end()
+                return
+            }
+            else res.status(200).set("Content-Type", 'application/json').json(response).end()
+        })
+        return
+    }
+
+    //  Get Messages with Settings
     let messages
 
     try {
@@ -37,6 +49,8 @@ router.get('/', [checkParameters(), validate()], async (req,res) => {
     } catch (err) {
         return res.status(500).json(JSON.stringify(err)).end()
     }
+
+    if(messages.length == 0) return res.status(404).end()
 
     // collect message ids 
     let messageIds = messages.reduce((p, c) => {
@@ -57,6 +71,7 @@ router.get('/', [checkParameters(), validate()], async (req,res) => {
         return i
     }, [])
 
+    
     res.status(200).set("Content-Type", 'application/json').json(mergedReports).end()
 })
 
