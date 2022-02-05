@@ -3,6 +3,7 @@ var router = express.Router()
 
 const { requireJson, checkSchema, checkId, validate, checkParameters } = require(__basedir + '/helper/custom-middleware')
 const { injectUserTokenIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
+const { matchAuthor } = require(__basedir + '/helper/util')
 
 const commentSchema = require(__basedir + '/schemas/comment')
 
@@ -126,10 +127,12 @@ router.get('/:objectId', [checkId(), validate()], async (req,res) => {
 router.delete('/:objectId', [checkId(), validate()], async (req,res) => {
     
     try {
-        await IsAuthor(req.params.objectId, req.body.userId)
+        let isAuthor = await matchAuthor(req.params.objectId, req.body.userId, commentStore)
+        if (isAuthor === false) return res.status(401).end()
     } catch (err) {
-        return res.status(401).json(err.toString()).end()
+        return res.status(500).json(err).end()
     }
+
 
     commentStore.deleteById(req.params.objectId, (response) => {
         if(!response){

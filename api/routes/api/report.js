@@ -3,7 +3,7 @@ var router = express.Router()
 
 const { requireJson, checkSchema, checkId, validate } = require(__basedir + '/helper/custom-middleware')
 const { injectUserTokenIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
-
+const { matchAuthor } = require(__basedir + '/helper/util')
 
 var reportSchema = require(__basedir + '/schemas/report')
 
@@ -62,12 +62,13 @@ router.get('/:objectId', [checkId(), validate()], (req,res) => {
 })
 
 
-router.delete('/:objectId', [checkId(), validate()], async (req,res) => {
+router.delete('/:objectId', [checkId(), injectUserTokenIntoBody(), validate()], async (req,res) => {
     
     try {
-        await IsAuthor(req.params.objectId, req.body.userId)
+        let isAuthor = await matchAuthor(req.params.objectId, req.body.userId, reportStore)
+        if (isAuthor === false) return res.status(401).end()
     } catch (err) {
-        return res.status(401).json(err.toString()).end()
+        return res.status(500).json(err).end()
     }
 
     reportStore.deleteById(req.params.objectId, (response) => {
@@ -110,18 +111,6 @@ function reportedObjectIsUniqueForUser(reportedObjectId, userId){
     })
 }
 
-
-function IsAuthor(commentId, userId){
-    return new Promise((resolve, reject) => {
-        reportStore.getById(commentId, (response) => {
-            if(!response) reject(new Error("Comment not found"))
-            else{
-                if(response.userId == userId) resolve()
-                else reject(new Error("Is not the author"))
-            }
-        })
-    })
-}
 
 function getReports(reportedObjectIds) {
     
