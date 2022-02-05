@@ -62,6 +62,7 @@ router.get('/', [checkParameters(), validate()], async (req,res) => {
     let reports = await getReports(messageIds)
 
     // merge messages and reports
+ 
     let mergedReports = messages.reduce((i, c) => {
         let message = c
         message.reports = reports.filter((rep) => {

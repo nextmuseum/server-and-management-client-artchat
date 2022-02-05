@@ -37,7 +37,7 @@ router.put('/', [requireJson(), injectUserTokenIntoBody(), checkSchema(reportSch
 
 router.get('/', async (req,res) => {
 
-    let reportedObjectId = req.query.reportedObjectId;
+    let reportedObjectId = req.query.reportedObjectId || null;
 
     const response = await getReports(reportedObjectId);
 
@@ -45,7 +45,7 @@ router.get('/', async (req,res) => {
         res.status(404).end()
         return
     }else{
-        res.status(200).set("Content-Type", 'application/json').json({"count": response.length, "data": [...response]}).end()
+        res.status(200).set("Content-Type", 'application/json').json(response).end()
     }
     
 })
@@ -98,7 +98,7 @@ function reportedObjectIsUniqueForUser(reportedObjectId, userId){
         };
 
         reportStore.getBySettings(settings,{},0,10, (response, err) => {
-            
+            console.log(response)
             if(response && response.length == 0 ) 
                 resolve(true)
             else if (response && response.length > 0 )
@@ -125,16 +125,21 @@ function IsAuthor(commentId, userId){
 
 function getReports(reportedObjectIds) {
     
-    // ad-hoc polymorphism *.*
-    let reportedObjectIdQuery = (typeof reportedObjectIds == 'string') ? [reportedObjectIds] : reportedObjectIds;
+    let query = {}
 
-    return new Promise((resolve, reject) => {
-        let query = {
+    // ad-hoc polymorphism -.-'
+    if (reportedObjectIds !== null) {
+        let reportedObjectIdQuery = (typeof reportedObjectIds == 'string') ? [reportedObjectIds] : reportedObjectIds;
+
+        query = {
             $or : [
                 { "commentId": { "$in": reportedObjectIdQuery } },
                 { "messageId": { "$in": reportedObjectIdQuery } }
             ]
         }
+    }
+       
+    return new Promise((resolve, reject) => {
 
         reportStore.getBySettings(query,{},0,10, (response, err) => {
 

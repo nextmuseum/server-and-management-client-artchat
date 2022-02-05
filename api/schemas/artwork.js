@@ -9,9 +9,10 @@ module.exports = {
             "description": {"type":"string"},
             "year": {"type":"string"},
             "imageSrc": {"type":"string"},
-            "mapId": {"type": "number"}
+            "mapId": {"type": "number"},
+            "exhibitionId": {"type": "string"}
         },
-        "required" : ["title", "artist", "description", "mapId"],
+        "required" : ["title", "artist", "description", "mapId", "exhibitionId"],
         "additionalProperties": false
     }
 }

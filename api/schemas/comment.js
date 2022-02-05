@@ -32,7 +32,7 @@ module.exports = {
                 "required" : ["x","y","z"]
             }
         },
-        "required" : ["text","position","rotation","artworkId","commentId"],
+        "required" : ["text","position","rotation","artworkId","userId"],
         "additionalProperties": false
     },
     POST: {
