@@ -93,7 +93,7 @@ router.post('/:userId/appdata', [validateInjectAuthUser(), injectUserTokenIntoBo
     await GetUserByUserId(validAuthUserId)
     .then(response => {
         if (!response) res.status(405).json({"error": `user appdata for user id ${validAuthUserId} does not exist`})
-        objectId = response_id
+        objectId = response._id
     })
     .catch(err => {
         //console.log(JSON.stringify(err))
@@ -230,5 +230,15 @@ function GetUserExhibitionsByUserId(userId){
     })
 }
 
+async function getUserName(userId) {
+    try {
+        let user = await GetUserByUserId(userId)
+        return user.userName
+    } catch (err) {
+        console.log(err)
+    }
+}
+
 
 module.exports = router
+module.exports.getUserName = getUserName;

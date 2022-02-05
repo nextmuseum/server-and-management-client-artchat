@@ -10,6 +10,7 @@ var _modelTemplate = require(__basedir + '/models/_modelTemplate')
 var messageStore = new _modelTemplate("messages")
 
 const { getReports } = require("./report")
+const { getUserName } = require("./user")
 
 router.get('/', [checkParameters(), validate()], async (req,res) => {
     //  Prepare Parameters for MongoDB Request
@@ -119,8 +120,10 @@ router.delete('/:objectId', [checkId(), validate()], async (req,res) => {
 })
 
 
-router.put('/', [requireJson(), injectUserTokenIntoBody(), checkSchema(messageSchema.PUT)], (req,res) => {
+router.put('/', [requireJson(), injectUserTokenIntoBody(), checkSchema(messageSchema.PUT)], async (req,res) => {
     
+    req.body.userName = await getUserName(req.body.userId)
+
     let newMessage = req.body
    
     messageStore.create(newMessage, (response) => {

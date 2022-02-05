@@ -10,16 +10,17 @@ const _modelTemplate = require(__basedir + '/models/_modelTemplate')
 const commentStore = new _modelTemplate("comments")
 
 const { getReports } = require("./report")
+const { getUserName } = require("./user")
 
-router.put('/', [requireJson(), injectUserTokenIntoBody(), checkSchema(commentSchema.PUT)], (req,res) => {
-    //  Prepare Body
+router.put('/', [requireJson(), injectUserTokenIntoBody(), checkSchema(commentSchema.PUT)], async (req,res) => {
+    
+    req.body.userName = await getUserName(req.body.userId)
+
     let newComment = req.body
 
-    //  Create Comment
-    commentStore.create(newComment, (response) => {
-        if(!response) {
-            res.status(500).end()
-            return
+    commentStore.create(newComment, (response, err) => {
+        if(err) {
+            return res.status(500).end()
         } else {
             res.status(201).set("Content-Type", 'application/json').json(response).end()
         }

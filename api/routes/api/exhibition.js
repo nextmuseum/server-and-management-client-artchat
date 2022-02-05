@@ -11,10 +11,9 @@ var exhibitionStore = new _modelTemplate("exhibitions")
 
 router.put('/', [requireJson(), checkSchema(exhibitionSchema.PUT)], (req,res) => {
     
-    exhibitionStore.create(req.body, (response) => {
-        if(!response) {
-            res.status(500).end()
-            return
+    exhibitionStore.create(req.body, (response, err) => {
+        if(err) {
+            return res.status(500).json(err).end()
         } else {
             res.status(201).set("Content-Type", 'application/json').json(response).end()
         }

@@ -4,7 +4,7 @@ module.exports = {
         "description": "Create user metadata object scheme",
         "type": "object",
         "properties": {
-            "username": {"type":"string"},
+            "userName": {"type":"string"},
             "activity": {"type":"array"},
             "userId": {"type":"string"}
         },
@@ -16,7 +16,7 @@ module.exports = {
         "description": "Update user metadata object scheme",
         "type": "object",
         "properties": {
-            "username": {"type":"string"},
+            "userName": {"type":"string"},
             "activity": {"type":"array"},
             "userId": {"type":"string"}
         },
