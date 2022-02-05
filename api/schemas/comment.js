@@ -35,8 +35,8 @@ module.exports = {
         "required" : ["text","position","rotation","artworkId","commentId"],
         "additionalProperties": false
     },
-    PATCH: {
-        "title": "PATCH Comment",
+    POST: {
+        "title": "POST Comment",
         "description": "Update Comment Body Schema",
         "type": "object",
         "properties": {

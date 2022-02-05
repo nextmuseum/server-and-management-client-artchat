@@ -11,8 +11,8 @@ module.exports = {
         "required": ["userId"],
         "additionalProperties": false
     },
-    PATCH: {
-        "title": "PATCH User",
+    POST: {
+        "title": "POST User",
         "description": "Update user metadata object scheme",
         "type": "object",
         "properties": {

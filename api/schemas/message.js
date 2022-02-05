@@ -12,9 +12,9 @@ module.exports = {
         "required" : ["text", "artworkId", "commentId", "userId"],
         "additionalProperties": false
     },
-    PATCH: {
-        "title": "PATCH Message",
-        "description": "PATCH Message Body Schema",
+    POST: {
+        "title": "POST Message",
+        "description": "POST Message Body Schema",
         "type": "object",
         "properties": {
             "text": {"type": "string"},

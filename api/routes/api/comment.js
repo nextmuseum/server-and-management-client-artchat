@@ -139,7 +139,7 @@ router.delete('/:objectId', [checkId(), validate()], async (req,res) => {
     })
 })
 
-router.patch('/:objectId', [checkId(), validate(), injectUserTokenIntoBody(), checkSchema(commentSchema.PATCH)], async (req,res) => {
+router.post('/:objectId', [checkId(), validate(), injectUserTokenIntoBody(), checkSchema(commentSchema.POST)], async (req,res) => {
 
     try {
         await IsAuthor(req.params.objectId, req.body.userId)

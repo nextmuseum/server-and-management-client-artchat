@@ -133,7 +133,7 @@ router.put('/', [requireJson(), injectUserTokenIntoBody(), checkSchema(messageSc
 })
 
 
-router.patch('/:objectId', [checkId(), validate(),  checkSchema(messageSchema.PATCH)], async (req,res) => {
+router.post('/:objectId', [checkId(), validate(),  checkSchema(messageSchema.POST)], async (req,res) => {
     await IsAuthor(req.params.objectId, req.body.userId).catch(() => {res.status(401).end()})
     
     messageStore.updateById(req.params.objectId, req.body, (response) => {

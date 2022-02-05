@@ -19,7 +19,7 @@ router.get('/me',  (req, res) => {
 
 })
 
-router.patch('/me/appdata', (req, res) => {    
+router.post('/me/appdata', (req, res) => {    
 
     let authId = req.user.sub.split('|')[1]
     res.redirect(307, '../' + authId + '/appdata')
@@ -83,7 +83,7 @@ router.put('/:userId/appdata', [validateInjectAuthUser(), injectUserTokenIntoBod
 
 })
 
-router.patch('/:userId/appdata', [validateInjectAuthUser(), injectUserTokenIntoBody(), checkSchema(userSchema.PATCH)], async (req,res) => {
+router.post('/:userId/appdata', [validateInjectAuthUser(), injectUserTokenIntoBody(), checkSchema(userSchema.POST)], async (req,res) => {
 
     let validAuthUserId = req.authUser.user_id.split('|')[1] 
     if (req.params.userId != validAuthUserId) return res.status(403).send()
@@ -116,7 +116,7 @@ router.patch('/:userId/appdata', [validateInjectAuthUser(), injectUserTokenIntoB
 
 
 //  ADD Artwork/Exhibition
-router.patch('/:userId/activity', [requireJson(), validateInjectAuthUser(), injectUserTokenIntoBody(), checkId(), validate()], async(req,res) => {
+router.post('/:userId/activity', [requireJson(), validateInjectAuthUser(), injectUserTokenIntoBody(), checkId(), validate()], async(req,res) => {
     
     if(req.params.userId != req.body.userId) return res.status(401).send()
 
