@@ -45,7 +45,7 @@ router.get('/forward-token', requiresAuth(), async (req, res) => {
     token.refresh_token = req.oidc.refreshToken
 
 	//return res.json(token)
-    res.redirect('unitydl://session?' + new URLSearchParams(token).toString())
+    res.redirect('artchatdl://session?' + new URLSearchParams(token).toString())
 })
 
 // helper endpoint for app refresh token query
