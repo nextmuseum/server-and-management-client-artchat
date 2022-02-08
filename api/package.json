@@ -27,7 +27,7 @@
     "helmet": "^5.0.2",
     "jsonwebtoken": "^8.5.1",
     "jwks-rsa": "^2.0.5",
-    "mongodb": "^3.6.4",
+    "mongodb": "^3.7.3",
     "morgan": "^1.10.0"
   },
   "devDependencies": {
