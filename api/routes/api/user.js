@@ -4,11 +4,17 @@ var router = express.Router()
 
 const { requireJson, checkSchema, checkId, checkUserId, validate, authenticateToken } = require(__basedir + '/helper/custom-middleware')
 const { injectUserTokenIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
+const guard = require('express-jwt-permissions')()
+
 
 var _modelTemplate = require(__basedir + '/models/_modelTemplate')
 var userSchema = require(__basedir + '/schemas/user')
-var userModel = new _modelTemplate("users")
+var userStore = new _modelTemplate("users")
 
+const verifyUserIsHimself = (req) => {
+    return (req.params.userId == req.user.sub.split('|')[1])
+};
+    
 
 // Pseudo endpoints for easier access
 
@@ -34,7 +40,24 @@ router.put('/me/appdata', (req, res) => {
 
 })
 
-router.get('/:userId', validateInjectAuthUser(), async (req,res) => { 
+router.get('/', guard.check("read:users") , (req,res) => {
+    console.log(req.user)
+    userStore.getBySettings({},{},0,10, (response, err) => {
+        if (err) return res.status(500).send(err);
+
+        if(!response){
+            return res.status(204).end()
+        }else{
+            res.status(200).set("Content-Type", 'application/json').json(response)
+        }
+    })
+})
+
+
+router.get('/:userId',
+    [guard.check("read:users").unless({ custom: verifyUserIsHimself }),
+    validateInjectAuthUser()],
+    async (req,res) => { 
 
     let validAuthUser = req.authUser
     let validAuthUserId = req.authUser.user_id.split('|')[1] // auth0|7a6sd576a5s6d75 get last bit
@@ -52,7 +75,12 @@ router.get('/:userId', validateInjectAuthUser(), async (req,res) => {
 	
 })
 
-router.put('/:userId/appdata', [validateInjectAuthUser(), injectUserTokenIntoBody(), checkSchema(userSchema.PUT)], async (req,res) => {
+router.put('/:userId/appdata', 
+    [guard.check("read:users").unless({ custom: verifyUserIsHimself}),
+    validateInjectAuthUser(),
+    injectUserTokenIntoBody(),
+    checkSchema(userSchema.PUT)],
+    async (req,res) => {
 
     let validAuthUserId = req.authUser.user_id.split('|')[1] // auth0|7a6sd576a5s6d75 get last bit
     if (req.params.userId != validAuthUserId) return res.status(403).send()
@@ -64,7 +92,7 @@ router.put('/:userId/appdata', [validateInjectAuthUser(), injectUserTokenIntoBod
         
         let user = req.body
 
-        userModel.create(user, (response, err) => {
+        userStore.create(user, (response, err) => {
             if (err)
                 res.status(500).json(err)
             if(response == null){
@@ -83,7 +111,12 @@ router.put('/:userId/appdata', [validateInjectAuthUser(), injectUserTokenIntoBod
 
 })
 
-router.post('/:userId/appdata', [validateInjectAuthUser(), injectUserTokenIntoBody(), checkSchema(userSchema.POST)], async (req,res) => {
+router.post('/:userId/appdata',
+    [guard.check("read:users").unless({ custom: verifyUserIsHimself}),
+    validateInjectAuthUser(),
+    injectUserTokenIntoBody(),
+    checkSchema(userSchema.POST)],
+    async (req,res) => {
 
     let validAuthUserId = req.authUser.user_id.split('|')[1] 
     if (req.params.userId != validAuthUserId) return res.status(403).send()
@@ -102,7 +135,7 @@ router.post('/:userId/appdata', [validateInjectAuthUser(), injectUserTokenIntoBo
 
     let user = req.body
 
-    userModel.updateById(objectId, user, (response, err) => {
+    userStore.updateById(objectId, user, (response, err) => {
         if (err)
             res.status(500).json(err)
         if(response == null){
@@ -116,7 +149,13 @@ router.post('/:userId/appdata', [validateInjectAuthUser(), injectUserTokenIntoBo
 
 
 //  ADD Artwork/Exhibition
-router.post('/:userId/activity', [requireJson(), validateInjectAuthUser(), injectUserTokenIntoBody(), checkUserId(), validate()], async(req,res) => {
+router.post('/:userId/activity',
+    [requireJson(),
+    validateInjectAuthUser(),
+    injectUserTokenIntoBody(),
+    checkUserId(),
+    validate()],
+    async(req,res) => {
     
     if(req.params.userId != req.body.userId) return res.status(401).send()
 
@@ -144,7 +183,10 @@ router.post('/:userId/activity', [requireJson(), validateInjectAuthUser(), injec
 })
 
 //  GET Artwork/Exhibition
-router.get('/:userId/activity', [validate()], async(req,res) => {
+router.get('/:userId/activity',
+    [
+        validate()
+    ], async(req,res) => {
 
     const activity = await GetUserExhibitionsByUserId(req.params.userId).catch(() => {return res.status(401).end() })
 
@@ -153,7 +195,7 @@ router.get('/:userId/activity', [validate()], async(req,res) => {
 
 function AddUniqueEntry(userId, match, matchSettings, settings){
     return new Promise((resolve,reject) => {
-        userModel.addToSet(userId, match, matchSettings, settings, (response) =>{
+        userStore.addToSet(userId, match, matchSettings, settings, (response) =>{
             if(!response){
                 reject(new Error("IdK"))
             }else{
@@ -170,7 +212,7 @@ function GetUserByUserId(userId){
         
         let settings = {"userId": { "$in": [userId] }}
         
-        userModel.getBySettings(settings,{},0,10, (response, err) => {
+        userStore.getBySettings(settings,{},0,10, (response, err) => {
 
             if(!response || response.length == 0) resolve(null)
             resolve(response[0])
@@ -186,7 +228,7 @@ function GetUserExhibitionsByUserId(userId){
 
         let settings = {"userId": { "$in": [userId] }}
 
-        userModel.getBySettings(settings,{},0,10, (response, err) => {
+        userStore.getBySettings(settings,{},0,10, (response, err) => {
 
             if(!response || response.length == 0) resolve(null)
             resolve( response[0].activity )

@@ -118,7 +118,7 @@ function getReports(reportedObjectIds) {
 
     // ad-hoc polymorphism -.-'
     if (reportedObjectIds !== null) {
-        let reportedObjectIdQuery = (typeof reportedObjectIds == 'string') ? [reportedObjectIds] : reportedObjectIds;
+        let reportedObjectIdQuery = (typeof reportedObjectIds === 'string') ? [reportedObjectIds] : reportedObjectIds;
 
         query = {
             $or : [
