@@ -163,33 +163,7 @@ function AddUniqueEntry(userId, match, matchSettings, settings){
     })
 }
 
-function upsertUser(user) {
-    try { 
-        userModel.create(user, (response) => {
-            if(!response) {
-                res.status(500).end()
-                return
-            } else {
-                res.status(201).set("Content-Type", 'application/json').json(response).end()
-            }
-        })
-    } catch {
-        res.status(500).send()
-    }
-}
 
-function GetUserByName(username){
-    return new Promise((resolve, reject) => {
-        let settings = {"username": { "$in": [username] }}
-
-        userModel.getBySettings(settings,{},0,10, (response) => {
-            if(!response || response.length == 0) reject(new Error("User not found"))
-            
-            resolve(response[0])
-            
-        })
-    })
-}
 
 function GetUserByUserId(userId){
     return new Promise((resolve, reject) => {
@@ -206,25 +180,17 @@ function GetUserByUserId(userId){
     })
 }
 
-function GetUserByObjectId(objectId){
-    return new Promise((resolve, reject) => {
-        userModel.getById(objectId, (response) => {
-            if(!response || response.length == 0) reject(new Error("User not found"))
-            resolve(response)
-        })
-    })
-}
 
 function GetUserExhibitionsByUserId(userId){
     return new Promise((resolve, reject) => {
 
         let settings = {"userId": { "$in": [userId] }}
 
-        userModel.getBySettings(settings,{},0,10,  (response) => {
+        userModel.getBySettings(settings,{},0,10, (response, err) => {
 
-            if(!response || response.length == 0) reject(new Error("User not found"))
-            
+            if(!response || response.length == 0) resolve(null)
             resolve( response[0].activity )
+            reject(new Error(err))
         
         })
     })

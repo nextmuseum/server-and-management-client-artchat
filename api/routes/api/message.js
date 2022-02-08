@@ -52,7 +52,7 @@ router.get('/', [checkParameters(), validate()], async (req,res) => {
         return res.status(500).json(JSON.stringify(err)).end()
     }
 
-    if(messages.length == 0) return res.status(404).end()
+    if(messages && messages.length == 0) return res.status(404).end()
 
     // collect message ids 
     let messageIds = messages.reduce((p, c) => {

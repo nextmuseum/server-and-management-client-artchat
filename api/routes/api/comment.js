@@ -67,7 +67,7 @@ router.get('/', [checkParameters(), validate()], async (req,res) => {
         return res.status(500).json(JSON.stringify(err)).end()
     }
 
-    if(comments.length == 0) return res.status(404).end()
+    if(comments && comments.length == 0) return res.status(404).end()
 
     // collect message ids 
     let messageIds = comments.reduce((p, c) => {
