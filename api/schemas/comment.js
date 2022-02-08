@@ -41,7 +41,7 @@ module.exports = {
         "type": "object",
         "properties": {
             "text": {"type": "string"},
-            "commentId": {"type": "string"},
+            "artworkId": {"type": "string"},
             "userId": {"type": "string"},
             "position":
             {
@@ -68,7 +68,7 @@ module.exports = {
                 "required" : ["x","y","z"]
             }
         },
-        "required" : ["text","commentId"],
+        "required" : ["text"],
         "additionalProperties": false
     }
 }
