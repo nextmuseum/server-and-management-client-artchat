@@ -1,7 +1,7 @@
 var express = require('express')
 var router = express.Router()
 
-const { requireJson, checkSchema, checkId, validate } = require(__basedir + '/helper/custom-middleware')
+const { requireJson, checkSchema, checkId, validate, parseIdQuery } = require(__basedir + '/helper/custom-middleware')
 
 var exhibitionSchema = require(__basedir + '/schemas/exhibition')
 
@@ -20,8 +20,11 @@ router.put('/', [requireJson(), checkSchema(exhibitionSchema.PUT)], (req,res) =>
     })
 })
 
-router.get('/', (req,res) => {
-    exhibitionStore.getBySettings({},{},0,10, (response) => {
+router.get('/', parseIdQuery(), (req,res) => {
+
+    let query = req.idQuery || {}
+
+    exhibitionStore.getBySettings(query,{},0,10, (response) => {
         if(!response){
             res.status(404).end()
             return
