@@ -161,9 +161,9 @@ router.post('/:userId/activity',
 
     const user = await GetUserByUserId(req.params.userId).catch(() => {return res.status(400).end()})
 
-    const foundEntry = user.activity.find(el => el.exhibitionId == req.body.exhibitionId)
+    const exhibitionEntry = (user.activity) ? user.activity.find(el => el.exhibitionId == req.body.exhibitionId) : null
 
-    if(foundEntry == null){
+    if(exhibitionEntry == null){
         await AddUniqueEntry(
             user._id,
             null,
