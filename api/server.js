@@ -10,7 +10,9 @@ app.use(morgan('combined'))
 
 // register request safety
 const helmet = require("helmet")
-app.use(helmet())
+app.use(helmet({
+    crossOriginEmbedderPolicy: false
+}))
 
 
 // Inject access tokens
