@@ -11,7 +11,8 @@ app.use(morgan('combined'))
 // register request safety
 const helmet = require("helmet")
 app.use(helmet({
-    crossOriginEmbedderPolicy: false
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" }
 }))
 
 
