@@ -4,6 +4,21 @@ var ajv = new Ajv({allErrors: true})
 var jwt = require('jsonwebtoken')
 const { body, check, validationResult } = require('express-validator')
 
+
+// ?ids=1,2,3
+exports.parseIdQuery = () => {
+    return (req, res, next) => {
+        let idsArr = req.query.ids
+
+        if (idsArr) {    
+            let ids = idsArr.split(',').map((id) => ObjectID(id))
+            req.idQuery = { _id: { "$in": ids }}
+        }
+
+        next()
+    }
+}
+
 exports.requireJson = () => {
     return (req, res, next) => {
         if(!req.is('application/json')) {
@@ -70,3 +85,4 @@ exports.authenticateToken = () => {
         })
     }
 }
+

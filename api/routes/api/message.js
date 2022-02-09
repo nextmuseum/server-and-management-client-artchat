@@ -1,7 +1,7 @@
 var express = require('express')
 var router = express.Router()
 
-const { requireJson, checkSchema, checkId, validate, checkParameters } = require(__basedir + '/helper/custom-middleware')
+const { requireJson, checkSchema, checkId, validate, checkParameters, parseIdQuery } = require(__basedir + '/helper/custom-middleware')
 const { injectUserTokenIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
 const { matchAuthor } = require(__basedir + '/helper/util')
 
@@ -13,7 +13,7 @@ var messageStore = new _modelTemplate("messages")
 const { getReports } = require("./report")
 const { getUserName } = require("./user")
 
-router.get('/', [checkParameters(), validate()], async (req,res) => {
+router.get('/', [checkParameters(), validate(), parseIdQuery()], async (req,res) => {
     //  Prepare Parameters for MongoDB Request
     // let sort = typeof req.query.sort === 'undefined' ? {} : { date: req.query.sort }
     let sort = typeof req.query.sort === 'undefined' ? {} : { _id: req.query.sort }
@@ -21,6 +21,11 @@ router.get('/', [checkParameters(), validate()], async (req,res) => {
     let limit = typeof req.query.limit === 'undefined' ? 10 : req.query.limit
     let count = typeof req.query.count === 'undefined' ? null : req.query.count
     let settings = typeof req.body.commentId === 'undefined' || req.body.commentId.length === 0 ? {} : {"commentId": { "$in": [req.body.commentId] }}
+
+    // parse ids query list from middleware
+    if (req.idQuery) {
+        settings = Object.assign(settings, req.idQuery)
+    }
 
     //  Request Message Count
     if(count){
