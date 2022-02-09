@@ -41,7 +41,7 @@ router.put('/me/appdata', (req, res) => {
 })
 
 router.get('/', guard.check("read:users") , (req,res) => {
-    console.log(req.user)
+    
     userStore.getBySettings({},{},0,10, (response, err) => {
         if (err) return res.status(500).send(err);
 
