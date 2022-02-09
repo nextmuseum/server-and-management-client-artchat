@@ -21,6 +21,7 @@
     "express": "^4.17.1",
     "express-access-token": "^1.1.5",
     "express-jwt": "^6.1.0",
+    "express-jwt-permissions": "^1.3.6",
     "express-oauth2-jwt-bearer": "^1.1.0",
     "express-openid-connect": "^2.5.2",
     "express-validator": "^6.9.2",
