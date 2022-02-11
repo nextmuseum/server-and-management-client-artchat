@@ -12,3 +12,18 @@ module.exports.matchAuthor = async function matchAuthor(objectId, userId, store)
         })
     })
 }
+
+const { a0management } = require('./Auth0Manager')
+module.exports.getAuthUser = async function getAuthUser(userId) {
+    return new Promise((resolve, reject) => {
+        a0management.getUsers({ q: `user_id:*${userId}` })
+        .then(response => {
+            if (response)
+                resolve(response[0])
+            resolve(null)
+        })
+        .catch(err => {
+            reject(err.originalError.response.text)
+        })
+    })
+}
