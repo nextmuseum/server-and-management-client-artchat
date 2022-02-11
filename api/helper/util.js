@@ -14,9 +14,9 @@ module.exports.matchAuthor = async function matchAuthor(objectId, userId, store)
 }
 
 const { a0management } = require('./Auth0Manager')
-module.exports.getAuthUser = async function getAuthUser(userId) {
+module.exports.getAuthUserByIdSuffix = async function getAuthUser(userId) {
     return new Promise((resolve, reject) => {
-        a0management.getUsers({ q: `user_id:*${userId}` })
+        a0management.getUsers({ q: `user_id:*${userId}` }) // look for (auth0|)userId suffix
         .then(response => {
             if (response)
                 resolve(response[0])

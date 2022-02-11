@@ -4,6 +4,7 @@ var router = express.Router()
 
 const { requireJson, checkSchema, checkId, checkUserId, validate, authenticateToken } = require(__basedir + '/helper/custom-middleware')
 const { injectUserTokenIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
+const { getAuthUserByIdSuffix } = require(__basedir + '/helper/util');
 const guard = require('express-jwt-permissions')()
 
 
@@ -21,7 +22,7 @@ const verifyUserIsHimself = (req) => {
 router.get('/me',  (req, res) => {
 
     let authId = req.user.sub.split('|')[1]
-    res.redirect(307, './' + authId)
+    res.redirect(307, './' + authId )
 
 })
 
@@ -57,21 +58,32 @@ router.get('/', guard.check("read:users") , (req,res) => {
 router.get('/:userId',
     [guard.check("read:users").unless({ custom: verifyUserIsHimself }),
     validateInjectAuthUser()],
+
     async (req,res) => { 
 
-    let validAuthUser = req.authUser
-    let validAuthUserId = req.authUser.user_id.split('|')[1] // auth0|7a6sd576a5s6d75 get last bit
+    let userId = req.params.userId,
+        user
 
-    await GetUserByUserId(validAuthUserId)
+    if (userId == req.authUser.user_id.split('|')[1]) 
+        user = req.authUser
+    else
+        try {
+            user = await getAuthUserByIdSuffix(userId)
+            if (user == null) res.status(404).json({'error':`auth user with id ${userId} not found`})
+        } catch (err) {
+            return res.status(500).json({'error': err})
+        }
+        
+    await GetUserByUserId(userId)
     .then(response => {
-        validAuthUser.appdata = response
+        user.appdata = response
     })
     .catch(err => {
         //console.log(JSON.stringify(err))
-        console.log(`user data for user ${validAuthUserId} not found`)
+        console.log(`user data for user ${userId} not found`)
     })
 
-    res.json(validAuthUser)
+    res.json(user)
 	
 })
 
@@ -153,7 +165,6 @@ router.post('/:userId/activity',
     [requireJson(),
     validateInjectAuthUser(),
     injectUserTokenIntoBody(),
-    checkUserId(),
     validate()],
     async(req,res) => {
     
