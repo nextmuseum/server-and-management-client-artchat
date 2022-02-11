@@ -21,5 +21,16 @@ module.exports = {
             "userId": {"type":"string"}
         },
         "additionalProperties": false
+    },
+    POST_USERACTIVITY: {
+        "title": "POST User activity",
+        "description": "Update user activity object scheme",
+        "type": "object",
+        "properties": {
+            "exhibitionId": {"type":"string"},
+            "artwork": {"type":"string"},
+            "userId": {"type":"string"}
+        },
+        "additionalProperties": false
     }
 }

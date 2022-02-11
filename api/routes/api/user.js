@@ -4,6 +4,7 @@ var router = express.Router()
 
 const { requireJson, checkSchema, checkId, checkUserId, validate, authenticateToken } = require(__basedir + '/helper/custom-middleware')
 const { injectUserTokenIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
+const { getAuthUserByIdSuffix } = require(__basedir + '/helper/util');
 const guard = require('express-jwt-permissions')()
 
 
@@ -18,25 +19,26 @@ const verifyUserIsHimself = (req) => {
 
 // Pseudo endpoints for easier access
 
-router.get('/me',  (req, res) => {
+router.get('/me/:subroute?',  (req, res) => {
 
     let authId = req.user.sub.split('|')[1]
+    let subRoute = req.params.subroute || null
+    if (subRoute)
+        return res.redirect(307, '../' + authId + '/' + ( subRoute || ''))
     res.redirect(307, './' + authId)
+})
+
+router.post('/me/:subroute', (req, res) => {    
+
+    let authId = req.user.sub.split('|')[1]
+    res.redirect(307, '../' + authId + '/' + req.params.subroute)
 
 })
 
-router.post('/me/appdata', (req, res) => {    
+router.put('/me/:subroute', (req, res) => {    
 
     let authId = req.user.sub.split('|')[1]
-    res.redirect(307, '../' + authId + '/appdata')
-
-})
-
-router.put('/me/appdata', (req, res) => {    
-
-    console.log("me app data triggered")
-    let authId = req.user.sub.split('|')[1]
-    res.redirect(307, '../' + authId + '/appdata')
+    res.redirect(307, '../' + authId + '/' + req.params.subroute)
 
 })
 
@@ -57,26 +59,37 @@ router.get('/', guard.check("read:users") , (req,res) => {
 router.get('/:userId',
     [guard.check("read:users").unless({ custom: verifyUserIsHimself }),
     validateInjectAuthUser()],
+
     async (req,res) => { 
 
-    let validAuthUser = req.authUser
-    let validAuthUserId = req.authUser.user_id.split('|')[1] // auth0|7a6sd576a5s6d75 get last bit
+    let userId = req.params.userId,
+        user
 
-    await GetUserByUserId(validAuthUserId)
+    if (userId == req.authUser.user_id.split('|')[1]) 
+        user = req.authUser
+    else
+        try {
+            user = await getAuthUserByIdSuffix(userId)
+            if (user == null) res.status(404).json({'error':`auth user with id ${userId} not found`})
+        } catch (err) {
+            return res.status(500).json({'error': err})
+        }
+        
+    await GetUserByUserId(userId)
     .then(response => {
-        validAuthUser.appdata = response
+        user.appdata = response
     })
     .catch(err => {
         //console.log(JSON.stringify(err))
-        console.log(`user data for user ${validAuthUserId} not found`)
+        console.log(`user data for user ${userId} not found`)
     })
 
-    res.json(validAuthUser)
+    res.json(user)
 	
 })
 
 router.put('/:userId/appdata', 
-    [guard.check("read:users").unless({ custom: verifyUserIsHimself}),
+    [guard.check("write:users").unless({ custom: verifyUserIsHimself}),
     validateInjectAuthUser(),
     injectUserTokenIntoBody(),
     checkSchema(userSchema.PUT)],
@@ -112,7 +125,7 @@ router.put('/:userId/appdata',
 })
 
 router.post('/:userId/appdata',
-    [guard.check("read:users").unless({ custom: verifyUserIsHimself}),
+    [guard.check("write:users").unless({ custom: verifyUserIsHimself}),
     validateInjectAuthUser(),
     injectUserTokenIntoBody(),
     checkSchema(userSchema.POST)],
@@ -150,14 +163,15 @@ router.post('/:userId/appdata',
 
 //  ADD Artwork/Exhibition
 router.post('/:userId/activity',
-    [requireJson(),
+    [guard.check("write:users").unless({ custom: verifyUserIsHimself}),
+    requireJson(),
     validateInjectAuthUser(),
     injectUserTokenIntoBody(),
-    checkUserId(),
+    checkSchema(userSchema.POST_USERACTIVITY),
     validate()],
     async(req,res) => {
     
-    if(req.params.userId != req.body.userId) return res.status(401).send()
+    
 
     const user = await GetUserByUserId(req.params.userId).catch(() => {return res.status(400).end()})
 
@@ -184,9 +198,9 @@ router.post('/:userId/activity',
 
 //  GET Artwork/Exhibition
 router.get('/:userId/activity',
-    [
-        validate()
-    ], async(req,res) => {
+    [guard.check("read:users").unless({ custom: verifyUserIsHimself}),
+    validate()],
+    async(req,res) => {
 
     const activity = await GetUserExhibitionsByUserId(req.params.userId).catch(() => {return res.status(401).end() })
 

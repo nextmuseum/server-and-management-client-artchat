@@ -13,15 +13,23 @@ module.exports = class _modelTemplate {
     initMongoClient() {
         let _this = this
         let collectionName = _this.collectionName
+
         MongoClient.connect( process.env.MONGO_URI,  { useNewUrlParser: true,  useUnifiedTopology: true }, function( err, client ) {
-            _this._db = client.db(process.env.MONGO_DB_NAME);
-            console.log("Initiated MongoDB client for col "+ collectionName + " : " + client.s.options.replicaSet + " " + client.s.options.dbName)
-           
+            try {
+                _this._db = client.db(process.env.MONGO_DB_NAME)
+                console.log("Initiated MongoDB client for col "+ collectionName + " : " + client.s.options.replicaSet + " " + client.s.options.dbName)
+            } catch (err) {
+                console.log(err)
+                console.log("Pausing MongoDB client for col "+ collectionName)
+                setTimeout(() => { _this.initMongoClient() }, 1000 + Math.round(Math.random()*5000))
+            }
+
             if(err){
                 console.log("MongoDB Connection Error:\n",err)
                 //return callback(null, err)
             }
         } );
+    
     }
 
     create(newItem, callback){
