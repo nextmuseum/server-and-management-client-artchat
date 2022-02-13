@@ -94,6 +94,10 @@ router.get('/', [checkParameters(), validate(), parseIdQuery()], async (req,res)
         return i
     }, [])
 
+
+    if(req.query.reported) {
+        mergedReports = mergedReports.filter((el) => el.reports.length)
+    }
     
     res.status(200).set("Content-Type", 'application/json').json(mergedReports).end()
 })
