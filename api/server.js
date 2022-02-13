@@ -31,7 +31,7 @@ app.use(function (req, res, next) {
     // Request methods to allow
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE')
     // Request headers to allow
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,Content-Type')
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,Content-Type,Authorization')
 
     next()
 })
