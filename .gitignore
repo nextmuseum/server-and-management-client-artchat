@@ -132,5 +132,4 @@ dist
 
 
 
-api/static-app/*
-!api/static-app/.gitkeep
+api/app/*
