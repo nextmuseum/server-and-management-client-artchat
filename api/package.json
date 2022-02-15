@@ -8,9 +8,7 @@
   "main": "server.js",
   "scripts": {
     "devStart": "nodemon server.js",
-    "start": "node server.js",
-    "buildApp": "cd ../app && npm install && npm run build",
-    "postinstall": "npm run buildApp"
+    "start": "node server.js"
   },
   "dependencies": {
     "ajv": "^7.0.4",
