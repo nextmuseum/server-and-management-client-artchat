@@ -10,9 +10,9 @@ import DocsCallout from '@/components/DocsCallout'
 import DocsExample from '@/components/DocsExample'
 
 // Import the plugin here
-import authConfig from './auth/auth_config.json'
+import authOptions from './auth/authOptions.js'
 import { setupAuth } from './auth'
-
+let authConfig = (process.env && process.env.NODE_ENV === 'development') ? authOptions.development: authOptions.production
 
 let app = createApp(App)
 app.use(store)
@@ -23,7 +23,14 @@ app.component('CIcon', CIcon)
 app.component('DocsCallout', DocsCallout)
 app.component('DocsExample', DocsExample)
 
-function callbackRedirect(appState) {
+function callbackRedirect(appState, authPlugin) {
+
+  // check for user permissions
+  if (authPlugin.user.value[authConfig.audience + "/roles"].indexOf("admin") == -1 )
+    return authPlugin.logout({
+      returnTo: window.location.origin + `/app?loginError=missingUserPrivilege&loginUser=${authPlugin.user.value.name}`
+    });
+
   router.push(
     appState && appState.targetUrl
       ? appState.targetUrl
@@ -34,3 +41,5 @@ function callbackRedirect(appState) {
 setupAuth(authConfig, callbackRedirect).then((auth) => {
   app.use(auth).mount('#app')
 })
+
+export default app
