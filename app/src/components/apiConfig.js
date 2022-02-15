@@ -10,4 +10,18 @@ let config = {
 	}
 }
 
-export default (process.env && process.env.NODE_ENV === 'development') ? config.development: config.production 
+let apiConfig
+
+// local
+if (process.env && process.env.NODE_ENV === 'development')
+	apiConfig = config.local
+
+// remote dev
+if (process.env && process.env.HEROKU_ENV === 'development')
+	apiConfig = config.development
+
+// remote production
+if (process.env && (process.env.HEROKU_ENV === 'production' || process.env.NODE_ENV === 'production'))
+	apiConfig = config.production
+
+export default apiConfig 
