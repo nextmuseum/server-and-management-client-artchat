@@ -24,4 +24,4 @@ if (process.env && process.env.HEROKU_ENV === 'development')
 if (process.env && (process.env.HEROKU_ENV === 'production' || process.env.NODE_ENV === 'production'))
 	apiConfig = config.production
 
-export default apiConfig 
+export default apiConfig
