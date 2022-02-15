@@ -17,7 +17,7 @@ if (process.env && process.env.NODE_ENV === 'development')
 	apiConfig = config.local
 
 // general "production"
-if (process.env && process.env.NODE_ENV === 'development')
+if (process.env && process.env.NODE_ENV === 'production')
 	apiConfig = config.development
 
 // remote dev
@@ -28,4 +28,4 @@ if (process.env && process.env.HEROKU_ENV === 'development')
 if (process.env && process.env.HEROKU_ENV === 'production')
 	apiConfig = config.production
 
-export default apiConfig
+export { apiConfig }

@@ -1,10 +1,7 @@
 <template>
   <CFooter>
     <div>
-      <a href="https://nextmuseum.io" target="_blank">Nextmuseum.io</a>
-      <span class="ms-1"
-        >&copy; {{ new Date().getFullYear() }} Kunstpalast</span
-      >
+      <CIcon icon="cil-code"/> Resource API: <b>{{ apiBase }}</b>
     </div>
     <div class="ms-auto">
       <span class="me-1" target="_blank">Powered by</span>
@@ -14,7 +11,12 @@
 </template>
 
 <script>
+
+import { apiConfig } from '@/components/apiConfig' 
 export default {
   name: 'AppFooter',
+  data: () => {
+    return { apiBase: apiConfig.apiBasePath }
+  }
 }
 </script>

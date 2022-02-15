@@ -10,9 +10,8 @@ import DocsCallout from '@/components/DocsCallout'
 import DocsExample from '@/components/DocsExample'
 
 // Import the plugin here
-import authOptions from './auth/authOptions.js'
+import authConfig from './auth/authOptions.js'
 import { setupAuth } from './auth'
-let authConfig = (process.env && process.env.NODE_ENV === 'development') ? authOptions.development: authOptions.production
 
 let app = createApp(App)
 app.use(store)

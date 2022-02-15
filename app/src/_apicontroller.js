@@ -1,7 +1,7 @@
 import axios from 'axios'
 import app from '@/main'
 
-import apiConfig from '@/components/apiConfig'
+import { apiConfig } from '@/components/apiConfig'
 
 const ai = axios.create({
 	baseURL: apiConfig.apiBasePath
