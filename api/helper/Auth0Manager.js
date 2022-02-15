@@ -11,7 +11,7 @@ const a0management = new ManagementClient({
   domain: process.env.A0_DOMAIN,
   clientId: process.env.A0_MGMT_CLIENT_ID,
   clientSecret: process.env.A0_MGMT_CLIENT_SECRET,
-  scope: 'read:users update:users',
+  scope: 'read:users update:users delete:users',
 })
 
 module.exports = { a0auth, a0management }

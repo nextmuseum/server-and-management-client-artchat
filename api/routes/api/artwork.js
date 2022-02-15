@@ -22,10 +22,26 @@ router.put('/', [requireJson(), checkSchema(artworkSchema.PUT)], (req,res) => {
 })
 
 router.get('/', parseIdQuery(), (req,res) => {
+
+    let sort = typeof req.query.sort === 'undefined' ? {} : { _id: req.query.sort }
+    let skip = typeof req.query.skip === 'undefined' ? 0 : req.query.skip
+    let limit = typeof req.query.limit === 'undefined' ? 10 : req.query.limit
+    let count = typeof req.query.count === 'undefined' ? null : req.query.count
+
+    if(count){
+        artworkStore.getCountAll( {}, (response, err) => {
+            if(!response){
+                res.status(500).end()
+                return
+            }
+            else res.status(200).set("Content-Type", 'application/json').json(response).end()
+        })
+        return
+    }
     
     let query = req.idQuery || {}
 
-    artworkStore.getBySettings(query,{},0,10, (response) => {
+    artworkStore.getBySettings(query, sort, skip, limit, (response) => {
         if(!response){
             res.status(404).end()
             return
