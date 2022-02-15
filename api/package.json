@@ -9,7 +9,7 @@
   "scripts": {
     "devStart": "nodemon server.js",
     "start": "node server.js",
-    "buildApp": "cd ../app && npm run install && npm run build",
+    "buildApp": "cd ../app && npm install && npm run build",
     "postinstall": "npm run buildApp"
   },
   "dependencies": {
