@@ -3,7 +3,7 @@ const path = require("path");
 
 module.exports = defineConfig({
   outputDir: path.resolve(__dirname, "../api/app"),
-  publicPath: (process.env.NODE_ENV === 'production' || process.env.HEROKU_ENV == true)
+  publicPath: (process.env.NODE_ENV === 'production' || process.env.HEROKU_ENV === 'true')
     ? '/app/'
     : '/',
   transpileDependencies: true,
