@@ -1,6 +1,9 @@
 require('dotenv').config()
 global.__basedir = __dirname
 
+const path = require('path')
+
+
 const app = require('express')()
 const http = require('http').Server(app)
 
@@ -12,7 +15,14 @@ app.use(morgan('combined'))
 const helmet = require("helmet")
 app.use(helmet({
     crossOriginEmbedderPolicy: false,
-    crossOriginResourcePolicy: { policy: "cross-origin" }
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    contentSecurityPolicy: {
+        directives: {
+            "frame-src": ["'self'", "https://nextmuseum-io.eu.auth0.com/"],
+            "connect-src": ["'self'", "https://nextmuseum-io.eu.auth0.com/", "https://nextmuseum-artchat.herokuapp.com", "https://nextmuseum-artchat-dev.herokuapp.com"],
+            "img-src": "*"
+        },
+    }
 }))
 
 
@@ -41,7 +51,7 @@ app.use(function (req, res, next) {
 app.use(require('express').json())
 app.use(function (error, req, res, next) {
     if (error instanceof SyntaxError)
-    res.status(400).set("Content-Type", 'application/json').json({'errors': error}).end()
+        res.status(400).set("Content-Type", 'application/json').json({ 'errors': error }).end()
     else next()
 })
 
@@ -60,7 +70,17 @@ app.use('/api', apiRoutes)
 // Serve static files
 app.use('/static', require('express').static('static'))
 
+// Serve build app files
+app.use('/app', require('express').static('app'))
+app.get('/app/*', function (req, res) {
+    res.sendFile(path.join(__dirname, '/app/index.html'), function (err) {
+        if (err) {
+            res.status(500).send(err)
+        }
+    })
+})
+
 // Start Server
-http.listen(settings.PORT, function(){
-    console.log('Server running on Port '+ settings.PORT)
+http.listen(settings.PORT, function () {
+    console.log('Server running on Port ' + settings.PORT)
 })
