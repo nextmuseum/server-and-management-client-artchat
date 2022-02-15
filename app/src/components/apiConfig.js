@@ -10,4 +10,4 @@ let config = {
 	}
 }
 
-export default (process.env && process.env.NODE_ENV === 'development') ? config.local: config.production 
+export default (process.env && process.env.NODE_ENV === 'development') ? config.development: config.production 
