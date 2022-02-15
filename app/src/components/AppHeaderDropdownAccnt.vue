@@ -3,7 +3,7 @@
     <CDropdownToggle placement="bottom-end" class="py-0" :caret="false">
       <CAvatar :src="this.$auth.user.value.picture" size="md" />
     </CDropdownToggle>
-    <CDropdownMenu class="pt-0">
+    <!-- <CDropdownMenu class="pt-0">
       <CDropdownHeader component="h6" class="bg-light fw-semibold py-2">
         Account
       </CDropdownHeader>
@@ -41,18 +41,16 @@
         <CIcon icon="cil-shield-alt" /> Lock Account
       </CDropdownItem>
       <CDropdownItem> <CIcon icon="cil-lock-locked" /> Logout </CDropdownItem>
-    </CDropdownMenu>
+    </CDropdownMenu> -->
   </CDropdown>
 </template>
 
 <script>
-import avatar from '@/assets/images/avatars/8.jpg'
 export default {
   name: 'AppHeaderDropdownAccnt',
   setup() {
     return {
-      avatar: avatar,
-      itemsCount: 42,
+      
     }
   },
 }

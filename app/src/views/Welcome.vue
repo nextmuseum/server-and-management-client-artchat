@@ -6,9 +6,9 @@
           <CCardHeader> Welcome </CCardHeader>
           <CCardBody>
             <div>
-              <h2>ARt chat admin panel</h2>
+              <h2>ARtchat admin panel</h2>
               <p>
-                Die Management-App für ARt chat.
+                Die Management-App für ARtchat.
               </p>
             </div>
             <CRow>
