@@ -32,7 +32,7 @@
       <hr>
       {{ deletingObject.reports.length }}x berichtet von: <br>
       <span v-for="report in deletingObject.reports" :key="report._id">
-        {{ report._id }} am {{ parseDate(report.date) }}
+        {{ report.userName || report.userId }} am {{ parseDate(report.date) }}<br>
       </span>
     </CModalBody>
     <CModalFooter>
@@ -83,7 +83,7 @@
         }).then((response) => {
           console.log(response)
           if (response.status == 204) 
-            _this.createToast({title:"Fehler beim Löschen", color: "success", content: `Kommentar/Nachricht "${object.text}" wurde gelöscht`})
+            _this.createToast({title:"Gelöscht", color: "success", content: `Kommentar/Nachricht "${object.text}" wurde gelöscht`})
         }).catch((err) => {
           _this.createToast({title:"Fehler beim Löschen", color: "danger", content: err.toString()})
         })

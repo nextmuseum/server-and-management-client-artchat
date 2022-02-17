@@ -6,7 +6,8 @@ module.exports = {
         "properties": {
             "messageId": {"type":"string"},
             "commentId": {"type":"string"},
-            "userId": {"type":"string"}
+            "userId": {"type":"string"},
+            "userName": {"type":"string"}
         },
         "required": ["userId"],
         "oneOf": [

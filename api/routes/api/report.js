@@ -10,6 +10,8 @@ var reportSchema = require(__basedir + '/schemas/report')
 var _modelTemplate = require(__basedir + '/models/_modelTemplate')
 var reportStore = new _modelTemplate("reports")
 
+const { getUserName } = require("./user")
+
 /*
 *   Middleware
 */
@@ -41,6 +43,10 @@ router.put('/',
     injectUserIdIntoBody(),
     checkSchema(reportSchema.PUT)],
     async (req, res) => {
+
+    req.body.userName = await getUserName(req.body.userId)
+
+    let newReport = req.body
     
     try {
         let reportedObjectId = req.body.commentId || req.body.messageId
@@ -54,7 +60,7 @@ router.put('/',
         return res.status(500).json(err.toString()).end()
     }
     
-    reportStore.create(req.body, (response) => {
+    reportStore.create(newReport, (response) => {
         if(!response) {
             res.status(500).end()
             return
