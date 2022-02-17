@@ -2,8 +2,8 @@ require('dotenv').config()
 var express = require('express')
 var router = express.Router()
 
-const { requireJson, checkSchema, checkId, checkUserId, validate, authenticateToken } = require(__basedir + '/helper/custom-middleware')
-const { injectUserTokenIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
+const { requireJson, checkSchema, validate } = require(__basedir + '/helper/custom-middleware')
+const { injectUserIdIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
 const { getAuthUserByIdSuffix, deleteAuthUserById } = require(__basedir + '/helper/util');
 const guard = require('express-jwt-permissions')()
 
@@ -12,10 +12,18 @@ var _modelTemplate = require(__basedir + '/models/_modelTemplate')
 var userSchema = require(__basedir + '/schemas/user')
 var userStore = new _modelTemplate("users")
 
+/*
+*   Middleware
+*/
+
 const verifyUserIsHimself = (req) => {
     return (req.params.userId == req.user.sub.split('|')[1])
 };
     
+
+/*
+*   Routing
+*/
 
 // Pseudo endpoints for easier access
 
@@ -153,7 +161,7 @@ router.delete('/:userId',
 router.put('/:userId/appdata', 
     [guard.check("write:users").unless({ custom: verifyUserIsHimself}),
     validateInjectAuthUser(),
-    injectUserTokenIntoBody(),
+    injectUserIdIntoBody(),
     checkSchema(userSchema.PUT)],
     async (req,res) => {
 
@@ -189,7 +197,7 @@ router.put('/:userId/appdata',
 router.post('/:userId/appdata',
     [guard.check("write:users").unless({ custom: verifyUserIsHimself}),
     validateInjectAuthUser(),
-    injectUserTokenIntoBody(),
+    injectUserIdIntoBody(),
     checkSchema(userSchema.POST)],
     async (req,res) => {
 
@@ -228,7 +236,7 @@ router.post('/:userId/activity',
     [guard.check("write:users").unless({ custom: verifyUserIsHimself}),
     requireJson(),
     validateInjectAuthUser(),
-    injectUserTokenIntoBody(),
+    injectUserIdIntoBody(),
     checkSchema(userSchema.POST_USERACTIVITY),
     validate()],
     async(req,res) => {
@@ -268,6 +276,11 @@ router.get('/:userId/activity',
 
     res.json(activity).send()
 })
+
+
+/*
+*   Functions
+*/
 
 function addUniqueEntry(userId, match, matchSettings, settings){
     return new Promise((resolve,reject) => {

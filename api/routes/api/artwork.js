@@ -1,14 +1,24 @@
 var express = require('express')
 var router = express.Router()
 
-const { requireJson, checkSchema, checkId, validate, parseIdQuery } = require(__basedir + '/helper/custom-middleware')
+const { requireJson, checkSchema, checkId, validate, parseIdQueryParam } = require(__basedir + '/helper/custom-middleware')
+const guard = require('express-jwt-permissions')()
 
 const artworkSchema = require(__basedir + '/schemas/artwork')
 
 const _modelTemplate = require(__basedir + '/models/_modelTemplate')
 const artworkStore = new _modelTemplate("artworks")
 
-router.put('/', [requireJson(), checkSchema(artworkSchema.PUT)], (req,res) => {
+/*
+*   Routing
+*/
+
+router.put('/',
+    [requireJson(),
+    guard.check("create:artworks"),
+    checkSchema(artworkSchema.PUT)],
+    
+    (req,res) => {
     let newArtwork = req.body
 
     artworkStore.create(newArtwork, (response) => {
@@ -21,7 +31,7 @@ router.put('/', [requireJson(), checkSchema(artworkSchema.PUT)], (req,res) => {
     })
 })
 
-router.get('/', parseIdQuery(), (req,res) => {
+router.get('/', parseIdQueryParam(), (req,res) => {
 
     let sort = typeof req.query.sort === 'undefined' ? {} : { _id: req.query.sort }
     let skip = typeof req.query.skip === 'undefined' ? 0 : req.query.skip
@@ -51,7 +61,9 @@ router.get('/', parseIdQuery(), (req,res) => {
     })
 })
 
-router.get('/:objectId', [checkId(), validate()], (req,res) => {
+router.get('/:objectId',
+    [checkId(), validate()],
+    (req,res) => {
     artworkStore.getById(req.params.objectId, (response) => {
         if(!response){
             res.status(404).end()
@@ -62,7 +74,26 @@ router.get('/:objectId', [checkId(), validate()], (req,res) => {
     })
 })
 
-//  Sub Route Comment
+router.delete('/:objectId',
+    [checkId(),
+    validate(),
+    guard.check("delete:artworks") ],
+    async (req,res) => {
+
+    exhibitionStore.deleteById(req.params.objectId, (response, err) => {
+        if (err)
+            return res.status(500).json({'error': err })
+        if(!response)
+            return res.status(404).end()
+        
+        res.status(204).end()
+    })
+})
+
+/*
+*   Sub routes
+*/
+
 const comment = require('./comment')
 router.use('/:objectId/comments', [checkId(), validate()], (req, res, next) => {
     req.body.artworkId = req.params.objectId

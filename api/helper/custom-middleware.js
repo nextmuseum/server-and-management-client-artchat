@@ -6,7 +6,7 @@ const { body, check, validationResult } = require('express-validator')
 
 
 // ?ids=1,2,3
-exports.parseIdQuery = () => {
+exports.parseIdQueryParam = () => {
     return (req, res, next) => {
         let idsArr = req.query.ids
 
@@ -36,16 +36,6 @@ exports.checkSchema = (scheme) => {
 exports.checkId = () => {
     return [
         check('objectId').custom((value, {req, location, path}) => {
-            if(!ObjectID.isValid(value)) throw new Error('Invalid ObjectID!')
-            else req[location][path] = ObjectID(value)
-            return true
-        })
-    ]
-}
-
-exports.checkUserId = () => {
-    return [
-        body('userId').custom((value, {req, location, path}) => {
             if(!ObjectID.isValid(value)) throw new Error('Invalid ObjectID!')
             else req[location][path] = ObjectID(value)
             return true
