@@ -77,8 +77,7 @@ router.get('/', async (req, res) => {
     const response = await getReports(reportedObjectId);
 
     if(!response){
-        res.status(404).end()
-        return
+        return res.status(200).json([])
     }else{
         res.status(200).set("Content-Type", 'application/json').json(response).end()
     }

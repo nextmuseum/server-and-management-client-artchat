@@ -36,7 +36,7 @@ router.get('/', parseIdQueryParam(), (req,res) => {
         if (err)
             return res.status(500).json({'error': err })
         if(!response)
-            return res.status(404).end()
+            return res.status(200).json([])
 
         res.status(200).set("Content-Type", 'application/json').json(response)
     })

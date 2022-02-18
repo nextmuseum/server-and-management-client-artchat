@@ -72,7 +72,7 @@ router.get('/', guard.check("read:users") , (req,res) => {
         if (err) return res.status(500).send(err);
 
         if(!response){
-            return res.status(204).end()
+            return res.status(200).json([])
         }else{
             res.status(200).set("Content-Type", 'application/json').json(response)
         }

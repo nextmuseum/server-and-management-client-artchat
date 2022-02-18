@@ -34,17 +34,16 @@ router.put('/',
 router.get('/', parseIdQueryParam(), (req,res) => {
 
     let sort = typeof req.query.sort === 'undefined' ? {} : { _id: req.query.sort }
-    let skip = typeof req.query.skip === 'undefined' ? 0 : req.query.skip
-    let limit = typeof req.query.limit === 'undefined' ? 10 : req.query.limit
+    let skip = typeof req.query.skip === 'undefined' ? 0 : parseInt(req.query.skip)
+    let limit = typeof req.query.limit === 'undefined' ? 10 : parseInt(req.query.limit)
     let count = typeof req.query.count === 'undefined' ? null : req.query.count
 
     if(count){
         artworkStore.getCountAll( {}, (response, err) => {
-            if(!response){
+            if(!response)
                 res.status(500).end()
-                return
-            }
-            else res.status(200).set("Content-Type", 'application/json').json(response).end()
+
+            else res.status(200).set("Content-Type", 'application/json').json(response)
         })
         return
     }
@@ -53,10 +52,9 @@ router.get('/', parseIdQueryParam(), (req,res) => {
 
     artworkStore.getBySettings(query, sort, skip, limit, (response) => {
         if(!response){
-            res.status(404).end()
-            return
+            return res.status(200).json([])
         }else{
-            res.status(200).set("Content-Type", 'application/json').json(response).end()
+            res.status(200).set("Content-Type", 'application/json').json(response)
         }
     })
 })

@@ -62,8 +62,8 @@ router.get('/', [checkParameters(), validate(), parseIdQueryParam()], async (req
     //  Prepare Parameters for MongoDB Request
     // let sort = typeof req.query.sort === 'undefined' ? {} : { date: req.query.sort }
     let sort = typeof req.query.sort === 'undefined' ? {} : { _id: req.query.sort }
-    let skip = typeof req.query.skip === 'undefined' ? 0 : req.query.skip
-    let limit = typeof req.query.limit === 'undefined' ? 10 : req.query.limit
+    let skip = typeof req.query.skip === 'undefined' ? 0 : parseInt(req.query.skip)
+    let limit = typeof req.query.limit === 'undefined' ? 10 : parseInt(req.query.limit)
     let count = typeof req.query.count === 'undefined' ? null : req.query.count
     let settings = typeof req.body.artworkId === 'undefined' || req.body.artworkId.length === 0 ? {} : {"artworkId": { "$in": [req.body.artworkId] }}
 
@@ -102,7 +102,7 @@ router.get('/', [checkParameters(), validate(), parseIdQueryParam()], async (req
         return res.status(500).json(JSON.stringify(err)).end()
     }
 
-    if(comments && comments.length == 0) return res.status(404).end()
+    if(comments && comments.length == 0) return res.status(200).json([])
 
     // collect message ids 
     let messageIds = comments.reduce((p, c) => {
