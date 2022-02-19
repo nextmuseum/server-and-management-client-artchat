@@ -2,7 +2,7 @@ var express = require('express')
 var router = express.Router()
 
 const { requireJson, checkSchema, checkId, validate, checkParameters, parseIdQueryParam } = require(__basedir + '/helper/custom-middleware')
-const { injectUserIdIntoBody } = require(__basedir + '/helper/custom-auth-middleware')
+const { presetSessionUserIdIntoBody } = require(__basedir + '/helper/custom-auth-middleware')
 const guard = require('express-jwt-permissions')()
 
 var messageSchema = require(__basedir + '/schemas/message')
@@ -147,7 +147,7 @@ router.get('/:objectId', [checkId(), validate()], async (req,res) => {
 
 router.delete('/:objectId',
     [checkId(),
-    injectUserIdIntoBody(), 
+    presetSessionUserIdIntoBody(), 
     guard.check("delete:comments").unless({ custom: verifyAuthorWithRequest }),
     validate()],
     async (req,res) => {
@@ -165,7 +165,7 @@ router.delete('/:objectId',
 
 router.put('/',
     [requireJson(),
-    injectUserIdIntoBody(),
+    presetSessionUserIdIntoBody(),
     checkSchema(messageSchema.PUT)],
     
     async (req,res) => {
@@ -186,7 +186,7 @@ router.put('/',
 router.post('/:objectId',
     [checkId(),
     validate(),
-    injectUserIdIntoBody(),
+    presetSessionUserIdIntoBody(),
     guard.check("update:comments").unless({ custom: verifyAuthorWithRequest }),
     checkSchema(messageSchema.POST)],
     

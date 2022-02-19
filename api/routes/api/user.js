@@ -3,7 +3,7 @@ var express = require('express')
 var router = express.Router()
 
 const { requireJson, checkSchema, validate } = require(__basedir + '/helper/custom-middleware')
-const { injectUserIdIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
+const { presetSessionUserIdIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
 const { getAuthUserByIdSuffix, deleteAuthUserById } = require(__basedir + '/helper/util');
 const guard = require('express-jwt-permissions')()
 
@@ -118,10 +118,13 @@ router.delete('/:userId',
     async (req, res) => { 
     
     let userId = req.params.userId,
+        skipAuthUser = req.query.skipAuthUser || false,
         authUser,
         mongoUser
 
     // get Auth0 user object
+
+    if (!skipAuthUser)
     try {
         authUser = await getAuthUserByIdSuffix(userId)
         if (authUser == null) return res.status(404).json({'error':`auth user with id ${userId} not found`})
@@ -133,7 +136,10 @@ router.delete('/:userId',
 
     try {
         mongoUser = await getUserByUserId(userId)
-        if (mongoUser == null) console.log(`mongo user with id ${userId} not found for deletion`)
+        if (mongoUser == null) {
+            console.log(`mongo user with id ${userId} not found for deletion`)
+            if (skipAuthUser) return res.status(404).end()
+        }
     } catch (err) {
         return res.status(500).json({'error': err})
     }
@@ -144,7 +150,8 @@ router.delete('/:userId',
         if (mongoUser != null) {
             await deleteUserByObjectId(mongoUser._id).catch(err => {
                 console.log(err)
-            })        
+            })
+            if (skipAuthUser) return res.status(204).end()
         }
 
         // delete authUser
@@ -152,26 +159,29 @@ router.delete('/:userId',
 
         if (deletionResult == null)
             return res.status(204).end()
+
+
     } catch (err) {
         return res.status(500).json({'error': err})
     }
+
+    return res.status(404).end()
 
 })
 
 router.put('/:userId/appdata', 
     [guard.check("write:users").unless({ custom: verifyUserIsHimself}),
     validateInjectAuthUser(),
-    injectUserIdIntoBody(),
+    presetSessionUserIdIntoBody(),
     checkSchema(userSchema.PUT)],
     async (req,res) => {
 
-    let validAuthUserId = req.authUser.user_id.split('|')[1] // auth0|7a6sd576a5s6d75 get last bit
-    if (req.params.userId != validAuthUserId) return res.status(403).send()
+    let userId = req.body.userId
 
-    await getUserByUserId(validAuthUserId)
+    await getUserByUserId(userId)
     .then(response => {
         if (response != null)
-            return res.status(405).json({"error": `user appdata for user id ${validAuthUserId} already exist`}).end()
+            return res.status(405).json({"error": `user appdata for user id ${userId} already exist`}).end()
         
         let user = req.body
 
@@ -197,7 +207,7 @@ router.put('/:userId/appdata',
 router.post('/:userId/appdata',
     [guard.check("write:users").unless({ custom: verifyUserIsHimself}),
     validateInjectAuthUser(),
-    injectUserIdIntoBody(),
+    presetSessionUserIdIntoBody(),
     checkSchema(userSchema.POST)],
     async (req,res) => {
 
@@ -236,7 +246,7 @@ router.post('/:userId/activity',
     [guard.check("write:users").unless({ custom: verifyUserIsHimself}),
     requireJson(),
     validateInjectAuthUser(),
-    injectUserIdIntoBody(),
+    presetSessionUserIdIntoBody(),
     checkSchema(userSchema.POST_USERACTIVITY),
     validate()],
     async(req,res) => {

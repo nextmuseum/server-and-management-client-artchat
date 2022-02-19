@@ -2,7 +2,7 @@ var express = require('express')
 var router = express.Router()
 
 const { requireJson, checkSchema, checkId, validate } = require(__basedir + '/helper/custom-middleware')
-const { injectUserIdIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
+const { presetSessionUserIdIntoBody } = require(__basedir + '/helper/custom-auth-middleware')
 const guard = require('express-jwt-permissions')()
 
 var reportSchema = require(__basedir + '/schemas/report')
@@ -40,7 +40,7 @@ const verifyAuthorWithRequest = async (req) => {
 
 router.put('/',
     [requireJson(),
-    injectUserIdIntoBody(),
+    presetSessionUserIdIntoBody(),
     checkSchema(reportSchema.PUT)],
     async (req, res) => {
 
@@ -102,7 +102,7 @@ router.get('/:objectId',
 
 router.delete('/:objectId',
     [checkId(),
-    injectUserIdIntoBody(),
+    presetSessionUserIdIntoBody(),
     guard.check("delete:reports").unless({ custom: verifyAuthorWithRequest }),
     validate()],
     
