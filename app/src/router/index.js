@@ -32,8 +32,8 @@ const routes = [
         path: '/reports',
         beforeEnter: routeGuard,
         name: 'Reports',
-        component: () => import('@/views/reports/Reports.vue'),
-      },
+        component: () => import('@/views/Reports.vue'),
+      }
     ],
   },
   {

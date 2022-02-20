@@ -1,57 +1,52 @@
 <template>
-  <CTable striped hover>
-    <CTableHead>
-      <CTableRow>
-        <CTableHeaderCell scope="col">#</CTableHeaderCell>
-        <CTableHeaderCell scope="col">Datum</CTableHeaderCell>
-        <CTableHeaderCell scope="col">Kommentar/Nachricht</CTableHeaderCell>
-        <CTableHeaderCell scope="col">Autor</CTableHeaderCell>
-        <CTableHeaderCell scope="col">Meldungen</CTableHeaderCell>
-        <CTableHeaderCell scope="col"></CTableHeaderCell>
-      </CTableRow>
-    </CTableHead>
-    <CTableBody>
-      <CTableRow v-for='(elem, index) in parsedReportedObjects' :color="( elem.reports.length > 1 ) ? 'warning' : ''" :key="elem.id">
-        <CTableHeaderCell scope="row">{{ index }}</CTableHeaderCell>
-        <CTableDataCell>{{ elem.date }}</CTableDataCell>
-        <CTableDataCell>{{ elem.text }}</CTableDataCell>
-        <CTableDataCell>{{ elem.userName }}</CTableDataCell>
-        <CTableDataCell>{{ elem.reports.length }}</CTableDataCell>
-        <CTableDataCell><CIcon @click="initiateDelete(elem._id)" icon="cil-trash"/></CTableDataCell>
-      </CTableRow>
-    </CTableBody>
-  </CTable>
-  <CModal :visible="Object.keys(deletingObject).length !== 0" backdrop="static" @close="() => { deletingObject = {} }">
-    <CModalHeader>
-      <CModalTitle>Kommentar/Nachricht löschen</CModalTitle>
-    </CModalHeader>
-    <CModalBody>
-      {{ deletingObject.text }}
-      <hr>
-      von Benutzer <b>{{ deletingObject.userName }}</b>
-      <hr>
-      {{ deletingObject.reports.length }}x berichtet von: <br>
-      <span v-for="report in deletingObject.reports" :key="report._id">
-        {{ report.userName || report.userId }} am {{ parseDate(report.date) }}<br>
-      </span>
-    </CModalBody>
-    <CModalFooter>
-      <CButton color="secondary" @click="() => { deletingObject = {} }">
-        Abbrechen
-      </CButton>
-      <CButton color="primary" @click="deleteObject(deletingObject)">Löschen</CButton>
-    </CModalFooter>
-  </CModal>
-  <CToaster placement="top-end">
-    <CToast v-for="(toast, index) in toasts" :key="index" :color="toast.color">
-      <CToastHeader closeButton>
-      <span class="me-auto fw-bold">{{toast.title}}</span>
-      </CToastHeader>
-      <CToastBody>
-        {{ toast.content }}
-      </CToastBody>  
-    </CToast>
-  </CToaster>
+  <div>
+    <CRow :xs="{ cols: 1, gutter: 4 }" :md="{ cols: 3}">
+      <CCol xs v-for='(elem) in parsedReportedObjects'  :key="elem.id" >
+        <CCard class="mb-3 border-top-3" :class="[{'border-top-warning' : (elem.reports.length > 1)}, {'border-top-danger' : (elem.reports.length > 2)}]">
+          <CCardHeader><small><b>{{ elem.reports.length }} Meldung{{ (elem.reports.length > 1) ? "en" : '' }}</b>, #{{ elem._id }}</small></CCardHeader>
+          <CCardBody>
+            <CCardTitle>{{ elem.userName }}</CCardTitle>
+            <CCardText>{{ elem.text }}</CCardText>
+            <CCardFooter>
+              <small class="text-muted">{{ elem.date }}</small><br>
+              <CButton size="sm" @click="initiateDelete(elem._id)" color="secondary" variant="outline"><CIcon icon="cil-trash"/> Löschen</CButton>
+            </CCardFooter>
+          </CCardBody>
+        </CCard>
+      </CCol>
+    </CRow>
+    <CModal :visible="Object.keys(deletingObject).length !== 0" backdrop="static" @close="() => { deletingObject = {} }">
+      <CModalHeader>
+        <CModalTitle>Kommentar/Nachricht löschen</CModalTitle>
+      </CModalHeader>
+      <CModalBody>
+        {{ deletingObject.text }}
+        <hr>
+        von Benutzer <b>{{ deletingObject.userName }}</b>
+        <hr>
+        {{ deletingObject.reports.length }}x berichtet von: <br>
+        <span v-for="report in deletingObject.reports" :key="report._id">
+          {{ report.userName || report.userId }} am {{ parseDate(report.date) }}<br>
+        </span>
+      </CModalBody>
+      <CModalFooter>
+        <CButton color="secondary" @click="() => { deletingObject = {} }">
+          Abbrechen
+        </CButton>
+        <CButton color="primary" @click="deleteObject(deletingObject)">Löschen</CButton>
+      </CModalFooter>
+    </CModal>
+    <CToaster placement="top-end">
+      <CToast v-for="(toast, index) in toasts" :key="index" :color="toast.color">
+        <CToastHeader closeButton>
+        <span class="me-auto fw-bold">{{toast.title}}</span>
+        </CToastHeader>
+        <CToastBody>
+          {{ toast.content }} 
+        </CToastBody>  
+      </CToast>
+    </CToaster>
+  </div>
 </template>
 
 <script>

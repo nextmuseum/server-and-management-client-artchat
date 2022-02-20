@@ -1,7 +1,9 @@
 <template>
   <CHeader position="sticky" class="mb-4">
     <CContainer fluid>
-      
+      <CHeaderToggler class="ps-1" @click="$store.commit('toggleSidebar')">
+        <CIcon icon="cil-menu" size="lg" />
+      </CHeaderToggler>
       <CImage :src="artchatLogo" height="45" />
       
       <!-- <CHeaderToggler class="ps-1" @click="$store.commit('toggleSidebar')">
@@ -73,6 +75,9 @@ export default {
         returnTo: window.location.origin + '/app'
       });
     }
+  },
+  mounted() {
+    this.$store.commit('updateSidebarVisible', true)
   }
 }
 </script>

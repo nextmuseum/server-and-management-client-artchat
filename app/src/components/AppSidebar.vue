@@ -14,17 +14,20 @@
     <CSidebarBrand style="background-color: #cafff3">
       <CImage fluid :src="nextmuseumLogo" style="height:60px" />
     </CSidebarBrand>
-    <CSidebarNav v-if="!$auth.loading.value">
+    <CSidebarNav>
       <CNavItem href="./welcome">
-        <CIcon customClassName="nav-icon" icon="cil-bell"/> Welcome
+        <CIcon customClassName="nav-icon" icon="cil-bell"/> Willkommen
       </CNavItem>
-      <CNavItem href="./dashboard" v-if="$auth.isAuthenticated.value">
-        <CIcon customClassName="nav-icon" icon="cil-speedometer"/> Dashboard
-      </CNavItem>
-      <CNavItem href="./reports" v-if="$auth.isAuthenticated.value">
-        <CIcon customClassName="nav-icon" icon="cil-report-slash"/> Reports
-      </CNavItem>
-      
+      <CNavGroup :visible="!$auth.loading.value">
+
+        <CNavItem href="./dashboard" v-if="$auth.isAuthenticated.value">
+          <CIcon customClassName="nav-icon" icon="cil-speedometer"/> Dashboard
+        </CNavItem>
+        <CNavItem href="./reports" v-if="$auth.isAuthenticated.value">
+          <CIcon customClassName="nav-icon" icon="cil-report-slash"/> Meldungen
+        </CNavItem>
+      </CNavGroup>
+        
     </CSidebarNav>
     <!-- <CSidebarToggler
       class="d-none d-lg-flex"
@@ -52,5 +55,8 @@ export default {
       sidebarVisible: computed(() => store.state.sidebarVisible),
     }
   },
+  methods: {
+
+  }
 }
 </script>

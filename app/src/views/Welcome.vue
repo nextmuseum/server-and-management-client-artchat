@@ -13,8 +13,9 @@
             </div>
             <CRow>
               <CCol :xs="6" v-if="!$auth.loading.value">
+                <CAlert v-if="$auth.isAuthenticated.value" color="info">Angemeldet als {{$auth.user.value.email}}</CAlert>
                 <CButton color="primary" class="px-4" @click="login" v-if="!$auth.isAuthenticated.value"> Login </CButton>
-                <CButton color="light" class="px-4" @click="logout" v-if="$auth.isAuthenticated.value"> Logout </CButton>
+                <CButton color="secondary" variant="outline" class="px-4" @click="logout" v-if="$auth.isAuthenticated.value"> Logout </CButton>
               </CCol>
             </CRow>
             <hr>
