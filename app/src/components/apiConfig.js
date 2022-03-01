@@ -13,19 +13,16 @@ let config = {
 let apiConfig
 
 // local
-if (process.env && process.env.NODE_ENV === 'development')
+if (process.env && process.env.NODE_ENV === 'local')
 	apiConfig = config.local
 
-// general "production"
+// development
+if (process.env && process.env.NODE_ENV === 'development')
+	apiConfig = config.development
+
+// production
 if (process.env && process.env.NODE_ENV === 'production')
-	apiConfig = config.development
-
-// remote dev
-if (process.env && process.env.HEROKU_ENV === 'development')
-	apiConfig = config.development
-
-// remote production
-if (process.env && process.env.HEROKU_ENV === 'production')
 	apiConfig = config.production
+
 
 export { apiConfig }

@@ -21,21 +21,18 @@ let authOptions = {
 
 let authConfig
 
-// dev
-if (process.env && process.env.NODE_ENV === 'development')
+// local
+if (process.env && process.env.NODE_ENV === 'local')
 	authConfig = Object.assign(authOptions.base, authOptions.local)
 
-// general "production"
+// development
+if (process.env && process.env.NODE_ENV === 'development')
+	authConfig = Object.assign(authOptions.base, authOptions.development)
+
+// production
 if (process.env && process.env.NODE_ENV === 'production')
-	authConfig = Object.assign(authOptions.base, authOptions.development)
-
-// remote dev
-if (process.env && process.env.HEROKU_ENV === 'development')
-	authConfig = Object.assign(authOptions.base, authOptions.development)
-
-// remote production
-if (process.env && process.env.HEROKU_ENV === 'production')
 	authConfig = Object.assign(authOptions.base, authOptions.production)
+
 
 export default authConfig
 

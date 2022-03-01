@@ -1,7 +1,7 @@
 {
   "name": "nextmuseum-artchat-bundle",
   "version": "1.0.0",
-  "description": "Nextmuseum.io ARtchat API + Management App",
+  "description": "Nextmuseum.io ARt chat API + Management App",
   "main": "",
   "scripts": {
     "install": "cd ./app && npm install --production=false && npm run build && cd ../api && npm install",
