@@ -3,7 +3,7 @@ const path = require("path");
 
 module.exports = defineConfig({
   outputDir: path.resolve(__dirname, "../api/app"),
-  publicPath: (process.env.NODE_ENV === 'production')
+  publicPath: (process.env.NODE_ENV !== 'local')
     ? '/app/'
     : '/',
   transpileDependencies: true,
