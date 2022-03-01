@@ -1,5 +1,5 @@
-var express = require('express')
-var router = express.Router()
+const express = require('express')
+const router = express.Router()
 
 const { requireJson, checkSchema, checkId, validate, checkParameters, parseIdQueryParam } = require(__basedir + '/helper/custom-middleware')
 const { presetSessionUserIdIntoBody } = require(__basedir + '/helper/custom-auth-middleware')

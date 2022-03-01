@@ -1,6 +1,6 @@
 require('dotenv').config()
-var express = require('express')
-var router = express.Router()
+const express = require('express')
+const router = express.Router()
 
 const { requireJson, checkSchema, validate } = require(__basedir + '/helper/custom-middleware')
 const { presetSessionUserIdIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
@@ -8,9 +8,9 @@ const { getAuthUserByIdSuffix, deleteAuthUserById } = require(__basedir + '/help
 const guard = require('express-jwt-permissions')()
 
 
-var _modelTemplate = require(__basedir + '/models/_modelTemplate')
-var userSchema = require(__basedir + '/schemas/user')
-var userStore = new _modelTemplate("users")
+const _modelTemplate = require(__basedir + '/models/_modelTemplate')
+const userSchema = require(__basedir + '/schemas/user')
+const userStore = new _modelTemplate("users")
 
 /*
 *   Middleware

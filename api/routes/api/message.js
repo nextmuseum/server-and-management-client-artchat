@@ -1,14 +1,14 @@
-var express = require('express')
-var router = express.Router()
+const express = require('express')
+const router = express.Router()
 
 const { requireJson, checkSchema, checkId, validate, checkParameters, parseIdQueryParam } = require(__basedir + '/helper/custom-middleware')
 const { presetSessionUserIdIntoBody } = require(__basedir + '/helper/custom-auth-middleware')
 const guard = require('express-jwt-permissions')()
 
-var messageSchema = require(__basedir + '/schemas/message')
+const messageSchema = require(__basedir + '/schemas/message')
 
-var _modelTemplate = require(__basedir + '/models/_modelTemplate')
-var messageStore = new _modelTemplate("messages")
+const _modelTemplate = require(__basedir + '/models/_modelTemplate')
+const messageStore = new _modelTemplate("messages")
 
 const { getReports } = require("./report")
 const { getUserName } = require("./user")

@@ -1,13 +1,13 @@
-var express = require('express')
-var router = express.Router()
+const express = require('express')
+const router = express.Router()
 
 const { requireJson, checkSchema, checkId, validate, parseIdQueryParam } = require(__basedir + '/helper/custom-middleware')
 const guard = require('express-jwt-permissions')()
 
-var exhibitionSchema = require(__basedir + '/schemas/exhibition')
+const exhibitionSchema = require(__basedir + '/schemas/exhibition')
 
-var _modelTemplate = require(__basedir + '/models/_modelTemplate')
-var exhibitionStore = new _modelTemplate("exhibitions")
+const _modelTemplate = require(__basedir + '/models/_modelTemplate')
+const exhibitionStore = new _modelTemplate("exhibitions")
 
 /*
 *   Routing

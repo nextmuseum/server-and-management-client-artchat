@@ -1,14 +1,14 @@
-var express = require('express')
-var router = express.Router()
+const express = require('express')
+const router = express.Router()
 
 const { requireJson, checkSchema, checkId, validate } = require(__basedir + '/helper/custom-middleware')
 const { presetSessionUserIdIntoBody } = require(__basedir + '/helper/custom-auth-middleware')
 const guard = require('express-jwt-permissions')()
 
-var reportSchema = require(__basedir + '/schemas/report')
+const reportSchema = require(__basedir + '/schemas/report')
 
-var _modelTemplate = require(__basedir + '/models/_modelTemplate')
-var reportStore = new _modelTemplate("reports")
+const _modelTemplate = require(__basedir + '/models/_modelTemplate')
+const reportStore = new _modelTemplate("reports")
 
 const { getUserName } = require("./user")
 
@@ -109,6 +109,37 @@ router.delete('/:objectId',
     async (req,res) => {
 
     reportStore.deleteById(req.params.objectId, (response, err) => {
+        if(err)
+            return res.status(500).json({'error': err})
+        if(!response)
+            return res.status(404).end()
+
+        res.status(204).end()
+    })
+})
+
+// delete by passing message/comment id
+router.delete('/',
+    [checkId(),
+    guard.check("delete:reports"),
+    checkSchema(reportSchema.DELETE_BY_KEY),
+    validate()],
+    
+    async (req,res) => {
+
+    let relatedMessageId = req.body.objectId
+    
+    console.log(relatedMessageId)
+    if(!relatedMessageId) return res.status(400).json({"error": "No object id provided"})
+
+    let deleteQuery = {
+        $or : [
+            { "commentId": { "$in": [relatedMessageId] } },
+            { "messageId": { "$in": [relatedMessageId] } }
+        ]
+    }
+
+    reportStore.deleteBySettings(deleteQuery, (response, err) => {
         if(err)
             return res.status(500).json({'error': err})
         if(!response)

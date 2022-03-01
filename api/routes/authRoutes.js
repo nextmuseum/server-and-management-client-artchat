@@ -1,5 +1,5 @@
-var express = require('express')
-var router = express.Router()
+const express = require('express')
+const router = express.Router()
 
 const { requiresAuth } = require('express-openid-connect')
 const { a0auth } = require('../helper/Auth0Manager')
