@@ -3,7 +3,7 @@ import { createStore } from 'vuex'
 export default createStore({
   state: {
     sidebarVisible: '',
-    sidebarUnfoldable: false,
+    sidebarUnfoldable: false
   },
   mutations: {
     toggleSidebar(state) {

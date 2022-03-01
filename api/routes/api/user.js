@@ -1,21 +1,29 @@
 require('dotenv').config()
-var express = require('express')
-var router = express.Router()
+const express = require('express')
+const router = express.Router()
 
-const { requireJson, checkSchema, checkId, checkUserId, validate, authenticateToken } = require(__basedir + '/helper/custom-middleware')
-const { injectUserTokenIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
-const { getAuthUserByIdSuffix } = require(__basedir + '/helper/util');
+const { requireJson, checkSchema, validate } = require(__basedir + '/helper/custom-middleware')
+const { presetSessionUserIdIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
+const { getAuthUserByIdSuffix, deleteAuthUserById } = require(__basedir + '/helper/util');
 const guard = require('express-jwt-permissions')()
 
 
-var _modelTemplate = require(__basedir + '/models/_modelTemplate')
-var userSchema = require(__basedir + '/schemas/user')
-var userStore = new _modelTemplate("users")
+const _modelTemplate = require(__basedir + '/models/_modelTemplate')
+const userSchema = require(__basedir + '/schemas/user')
+const userStore = new _modelTemplate("users")
+
+/*
+*   Middleware
+*/
 
 const verifyUserIsHimself = (req) => {
     return (req.params.userId == req.user.sub.split('|')[1])
 };
     
+
+/*
+*   Routing
+*/
 
 // Pseudo endpoints for easier access
 
@@ -43,12 +51,28 @@ router.put('/me/:subroute', (req, res) => {
 })
 
 router.get('/', guard.check("read:users") , (req,res) => {
+
+    let sort = typeof req.query.sort === 'undefined' ? {} : { _id: req.query.sort }
+    let skip = typeof req.query.skip === 'undefined' ? 0 : req.query.skip
+    let limit = typeof req.query.limit === 'undefined' ? 10 : req.query.limit
+    let count = typeof req.query.count === 'undefined' ? null : req.query.count
+
+    if(count){
+        userStore.getCountAll( {}, (response, err) => {
+            if(!response){
+                res.status(500).end()
+                return
+            }
+            else res.status(200).set("Content-Type", 'application/json').json(response).end()
+        })
+        return
+    }
     
-    userStore.getBySettings({},{},0,10, (response, err) => {
+    userStore.getBySettings({}, sort, skip, limit, (response, err) => {
         if (err) return res.status(500).send(err);
 
         if(!response){
-            return res.status(204).end()
+            return res.status(200).json([])
         }else{
             res.status(200).set("Content-Type", 'application/json').json(response)
         }
@@ -70,12 +94,12 @@ router.get('/:userId',
     else
         try {
             user = await getAuthUserByIdSuffix(userId)
-            if (user == null) res.status(404).json({'error':`auth user with id ${userId} not found`})
+            if (user == null) return res.status(404).json({'error':`auth user with id ${userId} not found`})
         } catch (err) {
             return res.status(500).json({'error': err})
         }
         
-    await GetUserByUserId(userId)
+    await getUserByUserId(userId)
     .then(response => {
         user.appdata = response
     })
@@ -88,20 +112,76 @@ router.get('/:userId',
 	
 })
 
+router.delete('/:userId',
+    [guard.check("delete:users").unless({ custom: verifyUserIsHimself }),
+    validateInjectAuthUser()],
+    async (req, res) => { 
+    
+    let userId = req.params.userId,
+        skipAuthUser = req.query.skipAuthUser || false,
+        authUser,
+        mongoUser
+
+    // get Auth0 user object
+
+    if (!skipAuthUser)
+    try {
+        authUser = await getAuthUserByIdSuffix(userId)
+        if (authUser == null) return res.status(404).json({'error':`auth user with id ${userId} not found`})
+    } catch (err) {
+        return res.status(500).json({'error': err})
+    }
+
+    // get mongo user object
+
+    try {
+        mongoUser = await getUserByUserId(userId)
+        if (mongoUser == null) {
+            console.log(`mongo user with id ${userId} not found for deletion`)
+            if (skipAuthUser) return res.status(404).end()
+        }
+    } catch (err) {
+        return res.status(500).json({'error': err})
+    }
+
+    // delete 
+    try {
+        // delete metadata
+        if (mongoUser != null) {
+            await deleteUserByObjectId(mongoUser._id).catch(err => {
+                console.log(err)
+            })
+            if (skipAuthUser) return res.status(204).end()
+        }
+
+        // delete authUser
+        let deletionResult = await deleteAuthUserById(authUser.user_id)
+
+        if (deletionResult == null)
+            return res.status(204).end()
+
+
+    } catch (err) {
+        return res.status(500).json({'error': err})
+    }
+
+    return res.status(404).end()
+
+})
+
 router.put('/:userId/appdata', 
     [guard.check("write:users").unless({ custom: verifyUserIsHimself}),
     validateInjectAuthUser(),
-    injectUserTokenIntoBody(),
+    presetSessionUserIdIntoBody(),
     checkSchema(userSchema.PUT)],
     async (req,res) => {
 
-    let validAuthUserId = req.authUser.user_id.split('|')[1] // auth0|7a6sd576a5s6d75 get last bit
-    if (req.params.userId != validAuthUserId) return res.status(403).send()
+    let userId = req.body.userId
 
-    await GetUserByUserId(validAuthUserId)
+    await getUserByUserId(userId)
     .then(response => {
         if (response != null)
-            return res.status(405).json({"error": `user appdata for user id ${validAuthUserId} already exist`}).end()
+            return res.status(405).json({"error": `user appdata for user id ${userId} already exist`}).end()
         
         let user = req.body
 
@@ -127,7 +207,7 @@ router.put('/:userId/appdata',
 router.post('/:userId/appdata',
     [guard.check("write:users").unless({ custom: verifyUserIsHimself}),
     validateInjectAuthUser(),
-    injectUserTokenIntoBody(),
+    presetSessionUserIdIntoBody(),
     checkSchema(userSchema.POST)],
     async (req,res) => {
 
@@ -136,7 +216,7 @@ router.post('/:userId/appdata',
 
     let objectId = ""
     
-    await GetUserByUserId(validAuthUserId)
+    await getUserByUserId(validAuthUserId)
     .then(response => {
         if (!response) res.status(405).json({"error": `user appdata for user id ${validAuthUserId} does not exist`})
         objectId = response._id
@@ -166,19 +246,19 @@ router.post('/:userId/activity',
     [guard.check("write:users").unless({ custom: verifyUserIsHimself}),
     requireJson(),
     validateInjectAuthUser(),
-    injectUserTokenIntoBody(),
+    presetSessionUserIdIntoBody(),
     checkSchema(userSchema.POST_USERACTIVITY),
     validate()],
     async(req,res) => {
     
     
 
-    const user = await GetUserByUserId(req.params.userId).catch(() => {return res.status(400).end()})
+    const user = await getUserByUserId(req.params.userId).catch(() => {return res.status(400).end()})
 
     const exhibitionEntry = (user.activity) ? user.activity.find(el => el.exhibitionId == req.body.exhibitionId) : null
 
     if(exhibitionEntry == null){
-        await AddUniqueEntry(
+        await addUniqueEntry(
             user._id,
             null,
             null,
@@ -186,7 +266,7 @@ router.post('/:userId/activity',
         ).catch(() => {res.status(500).end()})
     }
 
-    await AddUniqueEntry(
+    await addUniqueEntry(
         user._id,
         "activity",
         {$elemMatch: {"exhibitionId": req.body.exhibitionId}},
@@ -202,12 +282,17 @@ router.get('/:userId/activity',
     validate()],
     async(req,res) => {
 
-    const activity = await GetUserExhibitionsByUserId(req.params.userId).catch(() => {return res.status(401).end() })
+    const activity = await getUserExhibitionsByUserId(req.params.userId).catch(() => {return res.status(401).end() })
 
     res.json(activity).send()
 })
 
-function AddUniqueEntry(userId, match, matchSettings, settings){
+
+/*
+*   Functions
+*/
+
+function addUniqueEntry(userId, match, matchSettings, settings){
     return new Promise((resolve,reject) => {
         userStore.addToSet(userId, match, matchSettings, settings, (response) =>{
             if(!response){
@@ -221,7 +306,7 @@ function AddUniqueEntry(userId, match, matchSettings, settings){
 
 
 
-function GetUserByUserId(userId){
+function getUserByUserId(userId){
     return new Promise((resolve, reject) => {
         
         let settings = {"userId": { "$in": [userId] }}
@@ -236,8 +321,21 @@ function GetUserByUserId(userId){
     })
 }
 
+function deleteUserByObjectId(objectId){
+    return new Promise((resolve, reject) => {
+        
+        userStore.deleteById(objectId, (response, err) => {
 
-function GetUserExhibitionsByUserId(userId){
+            if(!response || response.length == 0) resolve(null)
+            resolve(response[0])
+            reject(new Error(err))
+            
+        })
+    })
+}
+
+
+function getUserExhibitionsByUserId(userId){
     return new Promise((resolve, reject) => {
 
         let settings = {"userId": { "$in": [userId] }}
@@ -254,7 +352,7 @@ function GetUserExhibitionsByUserId(userId){
 
 async function getUserName(userId) {
     try {
-        let user = await GetUserByUserId(userId)
+        let user = await getUserByUserId(userId)
         return user.userName
     } catch (err) {
         console.log(err)

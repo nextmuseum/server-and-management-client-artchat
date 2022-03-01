@@ -1,20 +1,22 @@
 <template>
   <CFooter>
     <div>
-      <a href="https://coreui.io" target="_blank">CoreUI</a>
-      <span class="ms-1"
-        >&copy; {{ new Date().getFullYear() }} creativeLabs.</span
-      >
+      <CIcon icon="cil-code"/> Resource API: <b>{{ apiBase }}</b>
     </div>
     <div class="ms-auto">
       <span class="me-1" target="_blank">Powered by</span>
-      <a href="https://coreui.io/vue">CoreUI for Vue</a>
+      <a href="https://vobe.digital" target="_blank">vobe.digital</a>
     </div>
   </CFooter>
 </template>
 
 <script>
+
+import { apiConfig } from '@/components/apiConfig' 
 export default {
   name: 'AppFooter',
+  data: () => {
+    return { apiBase: apiConfig.apiBasePath }
+  }
 }
 </script>

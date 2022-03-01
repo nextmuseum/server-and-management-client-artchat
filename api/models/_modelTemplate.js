@@ -102,6 +102,18 @@ module.exports = class _modelTemplate {
         })
         
     }
+
+    deleteBySettings(settings, callback){
+
+        let selected_col = this._db.collection(this.collectionName)
+
+        //  MONGODB OPERATION: DELETEONE
+        selected_col.deleteMany(settings, function(err, res) {
+            if(err) return callback(null, err)
+            else return callback(res.deletedCount)
+        })
+        
+    }
     
     updateById(id, updateData, callback){
 

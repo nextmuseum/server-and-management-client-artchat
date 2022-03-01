@@ -30,10 +30,10 @@ exports.validateInjectAuthUser = () => (req, res, next) => {
     })
 }
 
-// injects user token from session into req.body
-exports.injectUserTokenIntoBody = () => (req, res, next) => {
+// injects user token from session into req.body if its not set
+exports.presetSessionUserIdIntoBody = () => (req, res, next) => {
     
-	if (req.user.sub) req.body.userId = req.user.sub.split('|')[1]
+	if (req.user.sub) req.body.userId = req.body.userId || req.user.sub.split('|')[1]
 	return next()
 }
 

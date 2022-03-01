@@ -1,14 +1,23 @@
 export default [
   {
     component: 'CNavItem',
+    name: 'Welcome',
+    to: '/welcome',
+    icon: 'cil-bell',
+  },
+  {
+    component: 'CNavItem',
     name: 'Dashboard',
     to: '/dashboard',
     icon: 'cil-speedometer',
-    badge: {
-      color: 'primary',
-      text: 'NEW',
-    },
   },
+  {
+    component: 'CNavItem',
+    name: 'Reports',
+    to: '/reports',
+    icon: 'cil-report-slash',
+  }
+  /*
   {
     component: 'CNavTitle',
     name: 'Theme',
@@ -276,7 +285,7 @@ export default [
         to: '/pages/500',
       },
     ],
-  },
+  }, */
 
   // {
   //   component: 'CNavItem',

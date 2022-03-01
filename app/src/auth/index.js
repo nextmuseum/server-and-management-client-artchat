@@ -116,14 +116,18 @@ export const setupAuth = async (options, callbackRedirect) => {
 
       // Notify subscribers that the redirect callback has happened, passing the appState
       // (useful for retrieving any pre-authentication state)
-      callbackRedirect(appState)
+      
+      // get user to pass to redirect
+
+      state.user = await client.getUser()
+      callbackRedirect(appState, authPlugin)
     }
   } catch (e) {
     state.error = e
   } finally {
     // Initialize our internal authentication state
-    state.isAuthenticated = await client.isAuthenticated()
     state.user = await client.getUser()
+    state.isAuthenticated = await client.isAuthenticated()
     state.loading = false
   }
 

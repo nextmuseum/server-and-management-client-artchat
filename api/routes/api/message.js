@@ -1,24 +1,54 @@
-var express = require('express')
-var router = express.Router()
+const express = require('express')
+const router = express.Router()
 
-const { requireJson, checkSchema, checkId, validate, checkParameters, parseIdQuery } = require(__basedir + '/helper/custom-middleware')
-const { injectUserTokenIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
-const { matchAuthor } = require(__basedir + '/helper/util')
+const { requireJson, checkSchema, checkId, validate, checkParameters, parseIdQueryParam } = require(__basedir + '/helper/custom-middleware')
+const { presetSessionUserIdIntoBody } = require(__basedir + '/helper/custom-auth-middleware')
+const guard = require('express-jwt-permissions')()
 
-var messageSchema = require(__basedir + '/schemas/message')
+const messageSchema = require(__basedir + '/schemas/message')
 
-var _modelTemplate = require(__basedir + '/models/_modelTemplate')
-var messageStore = new _modelTemplate("messages")
+const _modelTemplate = require(__basedir + '/models/_modelTemplate')
+const messageStore = new _modelTemplate("messages")
 
 const { getReports } = require("./report")
 const { getUserName } = require("./user")
 
-router.get('/', [checkParameters(), validate(), parseIdQuery()], async (req,res) => {
+/*
+*   Middleware
+*/
+
+const verifyAuthorWithRequest = async (req) => {
+    let messageId = req.params.objectId,
+        userId = req.body.userId
+
+    return await new Promise((resolve, reject) => {
+        messageStore.getById(messageId, (response, err) => {
+            if (err) reject (err)
+            if (response && response.userId == userId)
+                resolve(true)
+
+            resolve(false)
+        })
+    }).catch((err) => {
+        console.log(err)
+    })
+};
+
+/*
+*   Routing
+*/
+
+router.get('/',
+    [checkParameters(),
+    validate(),
+    parseIdQueryParam()],
+    
+    async (req,res) => {
     //  Prepare Parameters for MongoDB Request
     // let sort = typeof req.query.sort === 'undefined' ? {} : { date: req.query.sort }
     let sort = typeof req.query.sort === 'undefined' ? {} : { _id: req.query.sort }
-    let skip = typeof req.query.skip === 'undefined' ? 0 : req.query.skip
-    let limit = typeof req.query.limit === 'undefined' ? 10 : req.query.limit
+    let skip = typeof req.query.skip === 'undefined' ? 0 : parseInt(req.query.skip)
+    let limit = typeof req.query.limit === 'undefined' ? 10 : parseInt(req.query.limit)
     let count = typeof req.query.count === 'undefined' ? null : req.query.count
     let settings = typeof req.body.commentId === 'undefined' || req.body.commentId.length === 0 ? {} : {"commentId": { "$in": [req.body.commentId] }}
 
@@ -57,7 +87,7 @@ router.get('/', [checkParameters(), validate(), parseIdQuery()], async (req,res)
         return res.status(500).json(JSON.stringify(err)).end()
     }
 
-    if(messages && messages.length == 0) return res.status(404).end()
+    if(messages && messages.length == 0) return res.status(200).json([])
 
     // collect message ids 
     let messageIds = messages.reduce((p, c) => {
@@ -115,70 +145,66 @@ router.get('/:objectId', [checkId(), validate()], async (req,res) => {
 })
 
 
-router.delete('/:objectId', [checkId(), injectUserTokenIntoBody(),  validate()], async (req,res) => {
-    
-    try {
-        let isAuthor = await matchAuthor(req.params.objectId, req.body.userId, messageStore)
-        if (isAuthor === false) return res.status(401).end()
-    } catch (err) {
-        return res.status(500).json(err).end()
-    }
+router.delete('/:objectId',
+    [checkId(),
+    presetSessionUserIdIntoBody(), 
+    guard.check("delete:comments").unless({ custom: verifyAuthorWithRequest }),
+    validate()],
+    async (req,res) => {
 
-
-    messageStore.deleteById(req.params.objectId, (response) => {
-        if(!response){
-            res.status(404).end()
-            return
-        }else{
-            res.status(204).end()
-        }
+    messageStore.deleteById(req.params.objectId, (response, err) => {
+        if (err)
+            return res.status(500).json({'error': err })
+        if(!response)
+            return res.status(404).end()
+            
+        res.status(204).end() 
     })
 })
 
 
-router.put('/', [requireJson(), injectUserTokenIntoBody(), checkSchema(messageSchema.PUT)], async (req,res) => {
+router.put('/',
+    [requireJson(),
+    presetSessionUserIdIntoBody(),
+    checkSchema(messageSchema.PUT)],
+    
+    async (req,res) => {
     
     req.body.userName = await getUserName(req.body.userId)
 
     let newMessage = req.body
    
     messageStore.create(newMessage, (response) => {
-        if(!response) {
-            res.status(500).end()
-            return
-        } else {
-            res.status(201).set("Content-Type", 'application/json').json(response).end()
-        }
+        if(!response) 
+            return res.status(500).end()
+
+        res.status(201).set("Content-Type", 'application/json').json(response)
     })
 })
 
 
-router.post('/:objectId', [checkId(), validate(),  checkSchema(messageSchema.POST)], async (req,res) => {
-    await IsAuthor(req.params.objectId, req.body.userId).catch(() => {res.status(401).end()})
+router.post('/:objectId',
+    [checkId(),
+    validate(),
+    presetSessionUserIdIntoBody(),
+    guard.check("update:comments").unless({ custom: verifyAuthorWithRequest }),
+    checkSchema(messageSchema.POST)],
     
-    messageStore.updateById(req.params.objectId, req.body, (response) => {
-        if(!response){
-            res.status(404).end()
-            return
-        }else{
-            res.status(204).end()
-        }
+    async (req,res) => {
+    
+    messageStore.updateById(req.params.objectId, req.body, (response, err) => {
+        if(err)
+            return res.status(500).json({'error': err}).send()
+        if(!response)
+            return res.status(404).end()
+
+        res.status(204).end()
     })
 })
 
-
-
-function IsAuthor(messageId, userId){
-    return new Promise((resolve, reject) => {
-        messageStore.getById(messageId, (response) => {
-            if(!response) reject(new Error("Comment not found"))
-            else{
-                if(response.userId == userId) resolve()
-                else reject(new Error("Is not the author"))
-            }
-        })
-    })
-}
+/*
+*   Functions
+*/
 
 async function injectReports(response) {
     let reports = await getReports(response._id.toString())

@@ -1,17 +1,52 @@
-var express = require('express')
-var router = express.Router()
+const express = require('express')
+const router = express.Router()
 
 const { requireJson, checkSchema, checkId, validate } = require(__basedir + '/helper/custom-middleware')
-const { injectUserTokenIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
-const { matchAuthor } = require(__basedir + '/helper/util')
+const { presetSessionUserIdIntoBody } = require(__basedir + '/helper/custom-auth-middleware')
+const guard = require('express-jwt-permissions')()
 
-var reportSchema = require(__basedir + '/schemas/report')
+const reportSchema = require(__basedir + '/schemas/report')
 
-var _modelTemplate = require(__basedir + '/models/_modelTemplate')
-var reportStore = new _modelTemplate("reports")
+const _modelTemplate = require(__basedir + '/models/_modelTemplate')
+const reportStore = new _modelTemplate("reports")
+
+const { getUserName } = require("./user")
+
+/*
+*   Middleware
+*/
 
 
-router.put('/', [requireJson(), injectUserTokenIntoBody(), checkSchema(reportSchema.PUT)], async (req,res) => {
+const verifyAuthorWithRequest = async (req) => {
+    let reportId = req.params.objectId,
+        userId = req.body.userId
+
+    return await new Promise((resolve, reject ) => {
+        reportStore.getById(reportId, (response, err) => {
+            if (err) reject (err)
+            if (response && response.userId == userId)
+                resolve(true)
+
+            resolve(false)
+        })
+    }).catch((err) => {
+        console.log(err)
+    })
+};
+
+/*
+*   Routing
+*/
+
+router.put('/',
+    [requireJson(),
+    presetSessionUserIdIntoBody(),
+    checkSchema(reportSchema.PUT)],
+    async (req, res) => {
+
+    req.body.userName = await getUserName(req.body.userId)
+
+    let newReport = req.body
     
     try {
         let reportedObjectId = req.body.commentId || req.body.messageId
@@ -25,7 +60,7 @@ router.put('/', [requireJson(), injectUserTokenIntoBody(), checkSchema(reportSch
         return res.status(500).json(err.toString()).end()
     }
     
-    reportStore.create(req.body, (response) => {
+    reportStore.create(newReport, (response) => {
         if(!response) {
             res.status(500).end()
             return
@@ -35,52 +70,88 @@ router.put('/', [requireJson(), injectUserTokenIntoBody(), checkSchema(reportSch
     })
 })
 
-router.get('/', async (req,res) => {
+router.get('/', async (req, res) => {
 
     let reportedObjectId = req.query.reportedObjectId || null;
 
     const response = await getReports(reportedObjectId);
 
     if(!response){
-        res.status(404).end()
-        return
+        return res.status(200).json([])
     }else{
         res.status(200).set("Content-Type", 'application/json').json(response).end()
     }
     
 })
 
-router.get('/:objectId', [checkId(), validate()], (req,res) => {
-    reportStore.getById(req.params.objectId, (response) => {
-        if(!response){
-            res.status(404).end()
-            return
-        }else{
-            res.status(200).set("Content-Type", 'application/json').json(response).end()
-        }
+router.get('/:objectId',
+    [checkId(),
+    validate()],
+    
+    (req, res) => {
+    reportStore.getById(req.params.objectId, (response, err) => {
+        if(err)
+            return res.status(500).json({'error': err})
+        if(!response)
+            return res.status(404).end()
+            
+        res.status(200).set("Content-Type", 'application/json').json(response)
     })
 })
 
 
-router.delete('/:objectId', [checkId(), injectUserTokenIntoBody(), validate()], async (req,res) => {
+router.delete('/:objectId',
+    [checkId(),
+    presetSessionUserIdIntoBody(),
+    guard.check("delete:reports").unless({ custom: verifyAuthorWithRequest }),
+    validate()],
     
-    try {
-        let isAuthor = await matchAuthor(req.params.objectId, req.body.userId, reportStore)
-        if (isAuthor === false) return res.status(401).end()
-    } catch (err) {
-        return res.status(500).json(err).end()
+    async (req,res) => {
+
+    reportStore.deleteById(req.params.objectId, (response, err) => {
+        if(err)
+            return res.status(500).json({'error': err})
+        if(!response)
+            return res.status(404).end()
+
+        res.status(204).end()
+    })
+})
+
+// delete by passing message/comment id
+router.delete('/',
+    [checkId(),
+    guard.check("delete:reports"),
+    checkSchema(reportSchema.DELETE_BY_KEY),
+    validate()],
+    
+    async (req,res) => {
+
+    let relatedMessageId = req.body.objectId
+    
+    console.log(relatedMessageId)
+    if(!relatedMessageId) return res.status(400).json({"error": "No object id provided"})
+
+    let deleteQuery = {
+        $or : [
+            { "commentId": { "$in": [relatedMessageId] } },
+            { "messageId": { "$in": [relatedMessageId] } }
+        ]
     }
 
-    reportStore.deleteById(req.params.objectId, (response) => {
-        if(!response){
-            res.status(404).end()
-            return
-        }else{
-            res.status(204).end()
-        }
+    reportStore.deleteBySettings(deleteQuery, (response, err) => {
+        if(err)
+            return res.status(500).json({'error': err})
+        if(!response)
+            return res.status(404).end()
+
+        res.status(204).end()
     })
 })
 
+/*
+*   Functions
+*/
 
 function reportedObjectIsUniqueForUser(reportedObjectId, userId){
 

@@ -1,0 +1,20 @@
+{
+  "name": "nextmuseum-artchat-bundle",
+  "version": "1.0.0",
+  "description": "Nextmuseum.io ARtchat API + Management App",
+  "main": "",
+  "scripts": {
+    "install": "cd ./app && npm install --production=false && npm run build && cd ../api && npm install",
+    "start": "cd ./api && npm start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nextmuseum/art-chat.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nextmuseum/art-chat/issues"
+  },
+  "homepage": "https://github.com/nextmuseum/art-chat#readme"
+}
