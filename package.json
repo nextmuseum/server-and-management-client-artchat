@@ -16,6 +16,10 @@
     "node": "16",
     "npm": "8"
   },
+  "cacheDirectories": [
+    "./api/node_modules",
+    "./app/node_modules"
+  ],
   "author": "nextmuseum",
   "license": "ISC",
   "bugs": {
