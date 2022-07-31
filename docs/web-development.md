@@ -10,7 +10,7 @@ Zunächst werden die Abhängigkeiten eingerichtet bzw. vorbereitet.
 <br>
 > ⚠️ Alle Zugangsdaten werden in der Umgebungsdatei `.env` bereitgestellt. Als Vorlage kann `.env.sample` kopiert und verwendet werden.
 
-### 1. Datenbankverbindung: MongoDB
+### 1. Datenbankverbindung: MongoDB (Backend)
 
 > Die Verwendung des Cloud-Services *MongoDB Atlas* ist **optional**. Es kann jede andere Instanz einer MongoDB Datenbank verwendet werden.
 
@@ -20,7 +20,7 @@ Zunächst werden die Abhängigkeiten eingerichtet bzw. vorbereitet.
 | **`MONGO_DB_NAME`** | Datenbankname separat
 
 
-### 2. Authentifizierung/Autorisierung: Auth0
+### 2. Authentifizierung/Autorisierung: Auth0 (Backend)
 
 > Die Verwendung von *Auth0* ist **erforderlich**. Die gesamte Anwendungslogik des ARt chat Backends baut spezifisch auf der *Auth0* Logik auf.
 
@@ -37,12 +37,34 @@ Zunächst werden die Abhängigkeiten eingerichtet bzw. vorbereitet.
 | **`A0_MGMT_CLIENT_ID`** | Client ID der System API (Management App)
 | **`A0_MGMT_CLIENT_SECRET`** | Secret der System API (Management App)
 
+### 3. Authentifizierung/Autorisierung: Auth0 (Frontend)
 
-### 3. Sonstiges
+In der `/app/authOptions.js` sind folgende wichtige Einstellungen zu berücksichtigen:
+
+| Schlüssel | Beschreibung 
+|-------------------|-------------
+| domain | siehe `A0_DOMAIN`
+| client_id | siehe `A0_CLIENT_ID`
+| audience | siehe `A0_API_IDENTIFIER`
+
+### 4. Sonstiges (Backend)
 
 | Umgebungsvariable | Beschreibung 
 |-------------------|-------------
-| **`APP_HOST`** | Lokaler Anwendungspfad, standardmäßig `http://localhost:4000` 
+| **`APP_HOST`** | Lokaler Anwendungspfad, standardmäßig `http://localhost:4000`
+| **`UNSAFE_SKIP_AUTH`** | API-Abfragen erfordern keinen Token mehr (**sollte niemals produktiv verwendet werden**)
+
+### 5. Domaineinstellungen
+
+Wichtige Domaineinstellungen sind an folgenden Stellen zu hinterlegen:
+
+- `/api/server.js`: CORS Einstellungen, zugelassene Hosts
+- `/app/authOptions.js`: Einstellungen für den Auth0-Login (Redirects)
+- `/app/apiConfig.js`: API-Host, der genutzt werden soll
+
+### 6. Benutzerrollen Auth0 (Management App)
+
+Damit ein Auth0 Benutzer auf die Administration (Management App) zugreifen kann, muss ihm die Rolle `admin` zugeteilt werden.
 
 ## Entwicklung
 
