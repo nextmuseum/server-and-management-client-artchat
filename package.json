@@ -4,7 +4,8 @@
   "description": "Nextmuseum.io ARt chat API + Management App",
   "main": "",
   "scripts": {
-    "install": "cd ./app && npm install --production=false && npm run build && cd ../api && npm install",
+    "install": "cd ./api && npm install && cd ../app && npm install",
+    "build": "cd ./app && npm run build",
     "start": "cd ./api && npm start"
   },
   "repository": {
@@ -12,7 +13,8 @@
     "url": "git+https://github.com/nextmuseum/art-chat.git"
   },
   "engines": {
-    "node": "16"
+    "node": "16",
+    "npm": "8"
   },
   "author": "nextmuseum",
   "license": "ISC",

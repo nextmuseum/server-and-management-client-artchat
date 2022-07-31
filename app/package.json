@@ -5,7 +5,7 @@
   "license": "",
   "author": "nextmuseum",
   "scripts": {
-    "build": "vue-cli-service build",
+    "build": "NODE_ENV=production vue-cli-service build --mode production",
     "lint": "vue-cli-service lint",
     "serve": "vue-cli-service serve",
     "test:e2e": "vue-cli-service test:e2e",
