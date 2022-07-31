@@ -1,8 +1,8 @@
 {
   "name": "artchat_api",
-  "version": "0.0.1",
-  "description": "ArtChat API",
-  "author": "We",
+  "version": "1.0.0",
+  "description": "ARt chat API",
+  "author": "nextmuseum",
   "keywords": [],
   "license": "MIT",
   "main": "server.js",

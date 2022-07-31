@@ -1,16 +1,9 @@
 {
-  "name": "@coreui/coreui-free-vue-admin-template",
+  "name": "artchat_management_app",
   "version": "4.1.0",
-  "description": "CoreUI Free Vue Admin Template",
-  "bugs": {
-    "url": "https://github.com/coreui/coreui-free-vue-admin-template/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:coreui/coreui-free-vue-admin-template.git"
-  },
-  "license": "MIT",
-  "author": "The CoreUI Team (https://github.com/orgs/coreui/people)",
+  "description": "ARt chat Management App",
+  "license": "",
+  "author": "nextmuseum",
   "scripts": {
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",

@@ -11,7 +11,10 @@
     "type": "git",
     "url": "git+https://github.com/nextmuseum/art-chat.git"
   },
-  "author": "",
+  "engines": {
+    "node": "16"
+  },
+  "author": "nextmuseum",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/nextmuseum/art-chat/issues"
