@@ -4,7 +4,7 @@
   "description": "Nextmuseum.io ARt chat API + Management App",
   "main": "",
   "scripts": {
-    "install": "ENV && cd ./app && npm install --production=false && npm run build && cd ../api && npm install",
+    "install": "cd ./app && npm install --production=false && npm run build && cd ../api && npm install",
     "start": "cd ./api && npm start"
   },
   "repository": {
