@@ -26,11 +26,11 @@ if (process.env && process.env.NODE_ENV === 'local')
 	authConfig = Object.assign(authOptions.base, authOptions.local)
 
 // development
-if (process.env && process.env.NODE_ENV === 'development')
+if (process.env && process.env.NPM_CONFIG_PRODUCTION === 'false' || process.env.NODE_ENV === 'development')
 	authConfig = Object.assign(authOptions.base, authOptions.development)
 
 // production
-if (process.env && process.env.NODE_ENV === 'production')
+if (process.env && process.env.NPM_CONFIG_PRODUCTION === 'true' && process.env.NODE_ENV === 'production')
 	authConfig = Object.assign(authOptions.base, authOptions.production)
 
 
