@@ -3,17 +3,22 @@ const jwks = require('jwks-rsa')
 const { a0management } = require(__basedir + '/helper/Auth0Manager')
 
 
-exports.isAuthenticated = jwt({
-	secret: jwks.expressJwtSecret({
-		cache: true,
-		rateLimit: true,
-		jwksRequestsPerMinute: 5,
-		jwksUri: process.env.A0_ISSUER_BASE_URL + '/.well-known/jwks.json'
-	}),
-	audience: process.env.A0_API_IDENTIFIER,
-	issuer: process.env.A0_ISSUER_BASE_URL + '/',
-	algorithms: ['RS256']
-})
+exports.isAuthenticated = (req, res, next) => {
+
+	if (process.env.UNSAFE_SKIP_AUTH) return next()
+
+	return jwt({
+		secret: jwks.expressJwtSecret({
+			cache: true,
+			rateLimit: true,
+			jwksRequestsPerMinute: 5,
+			jwksUri: process.env.A0_ISSUER_BASE_URL + '/.well-known/jwks.json'
+		}),
+		audience: process.env.A0_API_IDENTIFIER,
+		issuer: process.env.A0_ISSUER_BASE_URL + '/',
+		algorithms: ['RS256']
+	})(req, res, next)
+}
 
 
 // make sure that an auth0 user exists

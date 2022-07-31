@@ -11,7 +11,7 @@ const config = {
     authRequired: false,
     auth0Logout: true,
     baseURL: process.env.APP_HOST + '/auth',
-    secret: process.env.A0_SECRET,
+    secret: process.env.A0_SECRET_HASH,
     issuerBaseURL: process.env.A0_ISSUER_BASE_URL,
     clientID: process.env.A0_CLIENT_ID,
     clientSecret: process.env.A0_CLIENT_SECRET,
@@ -44,7 +44,7 @@ router.get('/forward-token', requiresAuth(), async (req, res) => {
     let token = { access_token, token_type, expires_in }
     token.refresh_token = req.oidc.refreshToken
 
-	//console.log(token)
+	console.log(token)
     res.redirect('artchatdl://session?' + new URLSearchParams(token).toString())
 })
 

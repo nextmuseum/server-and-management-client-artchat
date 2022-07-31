@@ -84,3 +84,5 @@ app.get('/app/*', function (req, res) {
 http.listen(settings.PORT, function () {
     console.log('Server running on Port ' + settings.PORT)
 })
+
+module.exports = http
