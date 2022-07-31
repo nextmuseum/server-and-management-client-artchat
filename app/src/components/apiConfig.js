@@ -17,11 +17,11 @@ if (process.env && process.env.NODE_ENV === 'local')
 	apiConfig = config.local
 
 // development
-if (process.env && process.env.NODE_ENV === 'development')
+if (process.env && process.env.NPM_CONFIG_PRODUCTION === 'false' || process.env.NODE_ENV === 'development')
 	apiConfig = config.development
 
 // production
-if (process.env && process.env.NODE_ENV === 'production')
+if (process.env && process.env.NPM_CONFIG_PRODUCTION === 'true' && process.env.NODE_ENV === 'production')
 	apiConfig = config.production
 
 
