@@ -104,6 +104,10 @@ router.get('/', [checkParameters(), validate(), parseIdQueryParam()], async (req
 
     if(comments && comments.length == 0) return res.status(200).json([])
 
+    // process reactions
+
+    comments = comments.map(comment => transformReactions(comment, req.body.userId))
+
     // collect message ids 
     let messageIds = comments.reduce((p, c) => {
         p.push(c._id.toString())
@@ -158,6 +162,7 @@ router.get('/:objectId', [checkId(), validate()], async (req,res) => {
         return res.status(404).end()
     }else{
         let enrichedResponse = await injectReports(response);
+        enrichedResponse = transformReactions(enrichedResponse, req.body.userId)
         res.status(200).set("Content-Type", 'application/json').json(enrichedResponse).end()
     }
 })
@@ -188,7 +193,27 @@ router.post('/:objectId',
     checkSchema(commentSchema.POST)],
     async (req,res) => {
 
-    commentStore.updateById(req.params.objectId, req.body, (response) => {
+
+    const {reaction, ...commentData} = req.body
+
+    if (reaction) {
+        commentStore.addToSet(
+            req.params.objectId,
+            null,
+            null,
+            { $addToSet: { reactions: [ req.body.userId, reaction ] } },
+            (response, err) => {
+                if(!response){
+                    res.status(500).json({'error': 'failed to set reaction'})
+                    return
+                } else if (!commentData) {
+                    res.status(204).end()
+                }
+            }   
+        )
+    }
+
+    commentStore.updateById(req.params.objectId, commentData, (response, err) => {
         if(!response){
             res.status(404).end()
             return
@@ -196,6 +221,7 @@ router.post('/:objectId',
             res.status(204).end()
         }
     })
+
 })
 
 
@@ -204,10 +230,32 @@ router.post('/:objectId',
 */
 
 async function injectReports(response) {
-    let reports = await getReports(response._id.toString())
-    let enrichedResponse = Object.assign(response, { "reports": [...reports] })
+    const reports = await getReports(response._id.toString())
+    const enrichedResponse = Object.assign(response, { "reports": [...reports] })
 
     return enrichedResponse
+}
+
+function transformReactions(response, userId) {
+    const { reactions, ...rest} = response
+
+    if (!reactions)
+        return response
+    
+    let distinctReactions = {}
+    let currentUserReaction = undefined
+    for (const [reactionUserId, emoji] of reactions) {
+        if (distinctReactions[emoji]) {
+            distinctReactions[emoji] += 1
+        } else {
+            distinctReactions[emoji] = 1
+        } 
+
+        if (reactionUserId === userId)
+            currentUserReaction = emoji
+    }
+
+    return {...rest, reactions: Object.entries(distinctReactions).map(([key, val]) => ({[key]: val})), currentUserReaction }
 }
 
 

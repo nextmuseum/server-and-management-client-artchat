@@ -23,6 +23,9 @@ exports.isAuthenticated = (req, res, next) => {
 
 // make sure that an auth0 user exists
 exports.validateInjectAuthUser = () => (req, res, next) => {
+
+	if (process.env.UNSAFE_SKIP_AUTH) return next()
+	
     let authId = req.user.sub
     a0management.getUser({ id: authId })
 	.then(user => {
@@ -37,6 +40,13 @@ exports.validateInjectAuthUser = () => (req, res, next) => {
 
 // injects user token from session into req.body if its not set
 exports.presetSessionUserIdIntoBody = () => (req, res, next) => {
+
+	if (process.env.UNSAFE_SKIP_AUTH) {
+		if (req.body.userId)
+			return next()
+
+		return res.status(403).json({'error': 'SKIP_AUTH_MODE: `userId` key needs to be provided explicitly.'})
+	}
     
 	if (req.user.sub) req.body.userId = req.body.userId || req.user.sub.split('|')[1]
 	return next()

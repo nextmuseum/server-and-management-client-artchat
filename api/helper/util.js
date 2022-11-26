@@ -41,3 +41,5 @@ module.exports.deleteAuthUserById = async function (userId) {
         })
     })
 }
+
+module.exports.pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x)

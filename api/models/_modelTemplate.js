@@ -1,5 +1,5 @@
-var MongoClient = require('mongodb').MongoClient
-var ObjectID = require('mongodb').ObjectID
+const MongoClient = require('mongodb').MongoClient
+const ObjectId = require('mongodb').ObjectId
 
 module.exports = class _modelTemplate {
     constructor(collectionName) {
@@ -34,8 +34,8 @@ module.exports = class _modelTemplate {
 
     create(newItem, callback){
 
-        //  Create MongoDB ObjectID and get Timestamp
-        newItem._id = ObjectID()
+        //  Create MongoDB ObjectId and get Timestamp
+        newItem._id = ObjectId()
         newItem.date = newItem._id.getTimestamp()
     
 
@@ -67,7 +67,7 @@ module.exports = class _modelTemplate {
 
     getById(id, callback){
 
-        let settings = {"_id": ObjectID(id)}
+        let settings = {"_id": ObjectId(id)}
         let selected_col = this._db.collection(this.collectionName)
 
         //  MONGODB OPERATION: FIND
@@ -92,7 +92,7 @@ module.exports = class _modelTemplate {
 
     deleteById(id, callback){
 
-        let settings = {"_id": ObjectID(id)}
+        let settings = {"_id": ObjectId(id)}
         let selected_col = this._db.collection(this.collectionName)
 
         //  MONGODB OPERATION: DELETEONE
@@ -117,7 +117,7 @@ module.exports = class _modelTemplate {
     
     updateById(id, updateData, callback){
 
-        let settings = {"_id": ObjectID(id)}
+        let settings = {"_id": ObjectId(id)}
     
         let update = {$set:{}}
         for (const [key, value] of Object.entries(updateData)){
@@ -137,7 +137,7 @@ module.exports = class _modelTemplate {
 
     addToSet(id, match, matchSettings, addSettings, callback){
 
-        let settings = {"_id": ObjectID(id)}
+        let settings = {"_id": ObjectId(id)}
         if(matchSettings != null) settings[match] = matchSettings
 
         let selected_col = this._db.collection(this.collectionName)

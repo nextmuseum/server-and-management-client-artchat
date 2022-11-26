@@ -1,4 +1,4 @@
-var ObjectID = require('mongodb').ObjectID
+var ObjectId = require('mongodb').ObjectId
 var Ajv = require('ajv').default
 var ajv = new Ajv({allErrors: true})
 var jwt = require('jsonwebtoken')
@@ -11,7 +11,7 @@ exports.parseIdQueryParam = () => {
         let idsArr = req.query.ids
 
         if (idsArr) {    
-            let ids = idsArr.split(',').map((id) => ObjectID(id))
+            let ids = idsArr.split(',').map((id) => ObjectId(id))
             req.idQuery = { _id: { "$in": ids }}
         }
 
@@ -36,8 +36,8 @@ exports.checkSchema = (scheme) => {
 exports.checkId = () => {
     return [
         check('objectId').custom((value, {req, location, path}) => {
-            if(!ObjectID.isValid(value)) throw new Error('Invalid ObjectID!')
-            else req[location][path] = ObjectID(value)
+            if(!ObjectId.isValid(value)) throw new Error('Invalid ObjectId!')
+            else req[location][path] = ObjectId(value)
             return true
         })
     ]
