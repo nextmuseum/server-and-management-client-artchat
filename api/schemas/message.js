@@ -20,9 +20,21 @@ module.exports = {
             "text": {"type": "string"},
             "commentId": {"type": "string"},
             "artworkId": {"type": "string"},
-            "userId": {"type": "string"}
+            "userId": {"type": "string"},
+            "reaction": { "type": "string" },
         },
-        "required" : ["text"],
+        "anyOf": [
+            {
+                "required": [
+                    "text"
+                ]
+            },
+            {
+                "required": [
+                    "reaction"
+                ]
+            }
+        ],
         "additionalProperties": false
     }
 }

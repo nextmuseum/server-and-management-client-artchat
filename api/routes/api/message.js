@@ -10,8 +10,10 @@ const messageSchema = require(__basedir + '/schemas/message')
 const _modelTemplate = require(__basedir + '/models/_modelTemplate')
 const messageStore = new _modelTemplate("messages")
 
-const { getReports } = require("./report")
+const { getReports, injectReports } = require("./report")
 const { getUserName } = require("./user")
+const { toggleInsertReaction, transformReactions } = require('./components/reactions')
+
 
 /*
 *   Middleware
@@ -64,7 +66,7 @@ router.get('/',
                 res.status(500).end()
                 return
             }
-            else res.status(200).set("Content-Type", 'application/json').json(response).end()
+            else res.status(200).set("Content-Type", 'application/json').json(response)
         })
         return
     }
@@ -84,10 +86,15 @@ router.get('/',
             })
         })
     } catch (err) {
-        return res.status(500).json(JSON.stringify(err)).end()
+        return res.status(500).json(JSON.stringify(err))
     }
 
+    // return if no messages
     if(messages && messages.length == 0) return res.status(200).json([])
+
+    // process reactions
+    messages = messages.map(message => transformReactions(message, req.body.userId))
+
 
     // collect message ids 
     let messageIds = messages.reduce((p, c) => {
@@ -113,7 +120,7 @@ router.get('/',
         mergedReports = mergedReports.filter((el) => el.reports.length)
     }
     
-    res.status(200).set("Content-Type", 'application/json').json(mergedReports).end()
+    res.status(200).set("Content-Type", 'application/json').json(mergedReports)
 })
 
 
@@ -133,14 +140,15 @@ router.get('/:objectId', [checkId(), validate()], async (req,res) => {
             })
         })
     } catch (err) {
-        return res.status(500).json(JSON.stringify(err)).end()
+        return res.status(500).json(JSON.stringify(err))
     }
     
     if(!response){
         return res.status(404).end()
     }else{
         let enrichedResponse = await injectReports(response);
-        res.status(200).set("Content-Type", 'application/json').json(enrichedResponse).end()
+        enrichedResponse = transformReactions(enrichedResponse, req.body.userId)
+        res.status(200).set("Content-Type", 'application/json').json(enrichedResponse)
     }
 })
 
@@ -189,29 +197,44 @@ router.post('/:objectId',
     presetSessionUserIdIntoBody(),
     guard.check("update:comments").unless({ custom: verifyAuthorWithRequest }),
     checkSchema(messageSchema.POST)],
-    
     async (req,res) => {
-    
-    messageStore.updateById(req.params.objectId, req.body, (response, err) => {
-        if(err)
-            return res.status(500).json({'error': err}).send()
-        if(!response)
-            return res.status(404).end()
+        const {reaction, ...additionalData} = req.body
+        
+        if (reaction) {
+            toggleInsertReaction(
+                messageStore,
+                req.params.objectId,
+                req.body.userId,
+                reaction
+            )
+            .then(() => {
+                if (!additionalData) {
+                    res.status(204).end()
+                }
+            })
+            .catch(() => res.status(500).json({'error': 'failed to set reaction'}))
+        }
 
-        res.status(204).end()
-    })
-})
+        messageStore.updateById(req.params.objectId, additionalData, (response, err) => {
+            if(err)
+                return res.status(500).json({'error': err}).send()
+            if(!response)
+                return res.status(404).end()
+
+            res.status(204).end()
+        })
+    }
+)
 
 /*
 *   Functions
 */
 
-async function injectReports(response) {
-    let reports = await getReports(response._id.toString())
-    let enrichedResponse = Object.assign(response, { "reports":  [...reports] })
 
-    return enrichedResponse
-}
+
+/*
+*   Sub routes
+*/
 
 const report = require('./report')
 router.use('/:objectId/reports', [checkId(), validate()], (req, res, next) => {

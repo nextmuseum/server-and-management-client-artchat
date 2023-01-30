@@ -10,8 +10,9 @@ const commentSchema = require(__basedir + '/schemas/comment')
 const _modelTemplate = require(__basedir + '/models/_modelTemplate')
 const commentStore = new _modelTemplate("comments")
 
-const { getReports } = require("./report")
+const { getReports, injectReports } = require("./report")
 const { getUserName } = require("./user")
+const { toggleInsertReaction, transformReactions } = require('./components/reactions')
 
 /*
 *   Middleware
@@ -53,7 +54,7 @@ router.put('/',
         if(err) {
             return res.status(500).end()
         } else {
-            res.status(201).set("Content-Type", 'application/json').json(response).end()
+            res.status(201).set("Content-Type", 'application/json').json(response)
         }
     })
 })
@@ -79,7 +80,7 @@ router.get('/', [checkParameters(), validate(), parseIdQueryParam()], async (req
                 res.status(500).end()
                 return
             }
-            else res.status(200).set("Content-Type", 'application/json').json(response).end()
+            else res.status(200).set("Content-Type", 'application/json').json(response)
         })
         return
     }
@@ -99,13 +100,13 @@ router.get('/', [checkParameters(), validate(), parseIdQueryParam()], async (req
             })
         })
     } catch (err) {
-        return res.status(500).json(JSON.stringify(err)).end()
+        return res.status(500).json(JSON.stringify(err))
     }
 
+    // return if no messages
     if(comments && comments.length == 0) return res.status(200).json([])
 
     // process reactions
-
     comments = comments.map(comment => transformReactions(comment, req.body.userId))
 
     // collect message ids 
@@ -155,7 +156,7 @@ router.get('/:objectId', [checkId(), validate()], async (req,res) => {
             })
         })
     } catch (err) {
-        return res.status(500).json(JSON.stringify(err)).end()
+        return res.status(500).json(JSON.stringify(err))
     }
 
     if(response == null){
@@ -163,7 +164,7 @@ router.get('/:objectId', [checkId(), validate()], async (req,res) => {
     }else{
         let enrichedResponse = await injectReports(response);
         enrichedResponse = transformReactions(enrichedResponse, req.body.userId)
-        res.status(200).set("Content-Type", 'application/json').json(enrichedResponse).end()
+        res.status(200).set("Content-Type", 'application/json').json(enrichedResponse)
     }
 })
 
@@ -192,71 +193,40 @@ router.post('/:objectId',
     guard.check("update:comments").unless({ custom: verifyAuthorWithRequest }),
     checkSchema(commentSchema.POST)],
     async (req,res) => {
+        const {reaction, ...additionalData} = req.body
 
-
-    const {reaction, ...commentData} = req.body
-
-    if (reaction) {
-        commentStore.addToSet(
-            req.params.objectId,
-            null,
-            null,
-            { $addToSet: { reactions: [ req.body.userId, reaction ] } },
-            (response, err) => {
-                if(!response){
-                    res.status(500).json({'error': 'failed to set reaction'})
-                    return
-                } else if (!commentData) {
+        if (reaction) {
+            toggleInsertReaction(
+                commentStore,
+                req.params.objectId,
+                req.body.userId,
+                reaction
+            )
+            .then(() => {
+                if (!additionalData) {
                     res.status(204).end()
                 }
-            }   
-        )
-    }
-
-    commentStore.updateById(req.params.objectId, commentData, (response, err) => {
-        if(!response){
-            res.status(404).end()
-            return
-        }else{
-            res.status(204).end()
+            })
+            .catch(() => res.status(500).json({'error': 'failed to set reaction'}))
         }
-    })
 
-})
+        commentStore.updateById(req.params.objectId, additionalData, (response, err) => {
+            if(!response){
+                res.status(404).end()
+                return
+            }else{
+                res.status(204).end()
+            }
+        })
+    }
+)
 
 
 /*
 *   Functions
 */
 
-async function injectReports(response) {
-    const reports = await getReports(response._id.toString())
-    const enrichedResponse = Object.assign(response, { "reports": [...reports] })
 
-    return enrichedResponse
-}
-
-function transformReactions(response, userId) {
-    const { reactions, ...rest} = response
-
-    if (!reactions)
-        return response
-    
-    let distinctReactions = {}
-    let currentUserReaction = undefined
-    for (const [reactionUserId, emoji] of reactions) {
-        if (distinctReactions[emoji]) {
-            distinctReactions[emoji] += 1
-        } else {
-            distinctReactions[emoji] = 1
-        } 
-
-        if (reactionUserId === userId)
-            currentUserReaction = emoji
-    }
-
-    return {...rest, reactions: Object.entries(distinctReactions).map(([key, val]) => ({[key]: val})), currentUserReaction }
-}
 
 
 /*

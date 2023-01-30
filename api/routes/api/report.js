@@ -149,6 +149,9 @@ router.delete('/',
     })
 })
 
+
+module.exports = router
+
 /*
 *   Functions
 */
@@ -183,7 +186,7 @@ function reportedObjectIsUniqueForUser(reportedObjectId, userId){
 }
 
 
-function getReports(reportedObjectIds) {
+const getReports = function(reportedObjectIds) {
     
     let query = {}
 
@@ -210,6 +213,13 @@ function getReports(reportedObjectIds) {
     })
 }
 
-
-module.exports = router
 module.exports.getReports = getReports
+
+const injectReports = async function(response) {
+    const reports = await getReports(response._id.toString())
+    const enrichedResponse = Object.assign(response, { "reports": [...reports] })
+
+    return enrichedResponse
+}
+
+module.exports.injectReports = injectReports

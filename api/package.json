@@ -7,7 +7,7 @@
   "license": "MIT",
   "main": "server.js",
   "scripts": {
-    "devStart": "nodemon server.js",
+    "devStart": "nodemon --inspect server.js",
     "start": "node server.js",
     "test": "npx mocha ./test/tests.js --delay --exit"
   },
