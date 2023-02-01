@@ -1,4 +1,4 @@
-const jwt = require('express-jwt')
+const { expressjwt: jwt } = require("express-jwt")
 const jwks = require('jwks-rsa')
 const { a0management } = require(__basedir + '/helper/Auth0Manager')
 
@@ -26,7 +26,7 @@ exports.validateInjectAuthUser = () => (req, res, next) => {
 
 	if (process.env.UNSAFE_SKIP_AUTH) return next()
 	
-    let authId = req.user.sub
+    let authId = req.auth.sub
     a0management.getUser({ id: authId })
 	.then(user => {
         req.authUser = user
@@ -48,7 +48,7 @@ exports.presetSessionUserIdIntoBody = () => (req, res, next) => {
 		return res.status(403).json({'error': 'SKIP_AUTH_MODE: `userId` key needs to be provided explicitly.'})
 	}
     
-	if (req.user.sub) req.body.userId = req.body.userId || req.user.sub.split('|')[1]
+	if (req.auth.sub) req.body.userId = req.body.userId || req.auth.sub.split('|')[1]
 	return next()
 }
 
