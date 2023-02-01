@@ -197,14 +197,15 @@ router.post('/:objectId',
     presetSessionUserIdIntoBody(),
     guard.check("update:comments").unless({ custom: verifyAuthorWithRequest }),
     checkSchema(messageSchema.POST)],
-    async (req,res) => {
-        const {reaction, ...additionalData} = req.body
+    async (req, res) => {
+        const { reaction, userId, ...additionalData } = req.body
+        const { objectId } = req.params
         
         if (reaction) {
             toggleInsertReaction(
                 messageStore,
-                req.params.objectId,
-                req.body.userId,
+                objectId,
+                userId,
                 reaction
             )
             .then(() => {
@@ -215,7 +216,7 @@ router.post('/:objectId',
             .catch(() => res.status(500).json({'error': 'failed to set reaction'}))
         }
 
-        messageStore.updateById(req.params.objectId, additionalData, (response, err) => {
+        messageStore.updateById(objectId, additionalData, (response, err) => {
             if(err)
                 return res.status(500).json({'error': err}).send()
             if(!response)
