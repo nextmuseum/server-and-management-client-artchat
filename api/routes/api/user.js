@@ -5,7 +5,7 @@ const router = express.Router()
 const { requireJson, checkSchema, validate } = require(__basedir + '/helper/custom-middleware')
 const { presetSessionUserIdIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
 const { getAuthUserByIdSuffix, deleteAuthUserById } = require(__basedir + '/helper/util');
-const guard = require('express-jwt-permissions')()
+const guard = require('express-jwt-permissions')({ requestProperty: 'auth' })
 
 
 const _modelTemplate = require(__basedir + '/models/_modelTemplate')

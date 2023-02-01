@@ -14,7 +14,6 @@ module.exports.transformReactions = function(response, userId) {
         } else {
             distinctReactions[emoji] = 1
         } 
-
         if (reactionUserId === userId)
             currentUserReaction = emoji
     }

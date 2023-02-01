@@ -3,7 +3,7 @@ const router = express.Router()
 
 const { requireJson, checkSchema, checkId, validate, checkParameters, parseIdQueryParam } = require(__basedir + '/helper/custom-middleware')
 const { presetSessionUserIdIntoBody } = require(__basedir + '/helper/custom-auth-middleware')
-const guard = require('express-jwt-permissions')()
+const guard = require('express-jwt-permissions')({ requestProperty: 'auth' })
 
 const commentSchema = require(__basedir + '/schemas/comment')
 
@@ -138,7 +138,7 @@ router.get('/', [checkParameters(), validate(), parseIdQueryParam()], async (req
 })
 
 
-router.get('/:objectId', [checkId(), validate()], async (req,res) => {
+router.get('/:objectId', [checkId(), validate(), presetSessionUserIdIntoBody()], async (req,res) => {
 
     let objectId = req.params.objectId;
 
@@ -161,7 +161,7 @@ router.get('/:objectId', [checkId(), validate()], async (req,res) => {
 
     if(response == null){
         return res.status(404).end()
-    }else{
+    } else {
         let enrichedResponse = await injectReports(response);
         enrichedResponse = transformReactions(enrichedResponse, req.body.userId)
         res.status(200).set("Content-Type", 'application/json').json(enrichedResponse)

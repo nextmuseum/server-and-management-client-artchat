@@ -3,7 +3,7 @@ const router = express.Router()
 
 const { requireJson, checkSchema, checkId, validate, checkParameters, parseIdQueryParam } = require(__basedir + '/helper/custom-middleware')
 const { presetSessionUserIdIntoBody } = require(__basedir + '/helper/custom-auth-middleware')
-const guard = require('express-jwt-permissions')()
+const guard = require('express-jwt-permissions')({ requestProperty: 'auth' })
 
 const messageSchema = require(__basedir + '/schemas/message')
 
@@ -124,7 +124,7 @@ router.get('/',
 })
 
 
-router.get('/:objectId', [checkId(), validate()], async (req,res) => {
+router.get('/:objectId', [checkId(), validate(), presetSessionUserIdIntoBody()], async (req,res) => {
     let objectId = req.params.objectId;
 
     let response

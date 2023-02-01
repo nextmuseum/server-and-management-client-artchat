@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 
 const { requireJson, checkSchema, checkId, validate, parseIdQueryParam } = require(__basedir + '/helper/custom-middleware')
-const guard = require('express-jwt-permissions')()
+const guard = require('express-jwt-permissions')({ requestProperty: 'auth' })
 
 const exhibitionSchema = require(__basedir + '/schemas/exhibition')
 
