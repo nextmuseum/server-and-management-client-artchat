@@ -6,19 +6,15 @@ module.exports.transformReactions = function(response, userId) {
     if (!reactions) 
         return response
     
-    let distinctReactions = {}
-    let currentUserReaction = undefined
-    for (const [reactionUserId, emoji] of reactions) {
-        if (distinctReactions[emoji]) {
-            distinctReactions[emoji] += 1
-        } else {
-            distinctReactions[emoji] = 1
-        } 
-        if (reactionUserId === userId)
-            currentUserReaction = emoji
-    }
+	const distinctReactions = reactions.reduce((result, [reactionUserId, reaction]) => {
+		result[reaction] ??= { count: 0, currentUser: false }
+		result[reaction].count += 1
+		result[reaction].currentUser = (reactionUserId === reactionUserId) || result[reaction].currentUser
 
-    return {...rest, reactions: Object.entries(distinctReactions).map(([key, val]) => ({[key]: val})), currentUserReaction }
+		return result
+	}, {})
+
+    return {...rest, reactions: Object.entries(distinctReactions).map(([key, values]) => ({ 'reaction': key, ...values})) }
 }
 
 module.exports.toggleInsertReaction = async function(store, objectId, userId, reaction) {
