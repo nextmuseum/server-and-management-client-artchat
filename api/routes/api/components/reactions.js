@@ -9,7 +9,7 @@ module.exports.transformReactions = function(response, userId) {
 	const distinctReactions = reactions.reduce((result, [reactionUserId, reaction]) => {
 		result[reaction] ??= { count: 0, currentUser: false }
 		result[reaction].count += 1
-		result[reaction].currentUser = (reactionUserId === reactionUserId) || result[reaction].currentUser
+		result[reaction].currentUser = (reactionUserId === userId) || result[reaction].currentUser
 
 		return result
 	}, {})
