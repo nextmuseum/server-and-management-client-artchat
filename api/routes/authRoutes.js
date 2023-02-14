@@ -44,7 +44,7 @@ router.get('/forward-token', requiresAuth(), async (req, res) => {
     let token = { access_token, token_type, expires_in }
     token.refresh_token = req.oidc.refreshToken
 
-	console.log(token)
+    if (process.env.NODE_ENV !== 'production') console.log(token)
     res.redirect('artchatdl://session?' + new URLSearchParams(token).toString())
 })
 

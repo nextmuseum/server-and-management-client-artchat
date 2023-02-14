@@ -35,6 +35,8 @@ const verifyAuthorWithRequest = async (req) => {
     })
 };
 
+const ensureReactionPayload = async(req) => Object.keys(req.body).every((key) => ['reaction', 'userId'].includes(key))
+
 /*
 *   Routing
 */
@@ -190,7 +192,7 @@ router.post('/:objectId',
     [checkId(),
     validate(),
     presetSessionUserIdIntoBody(),
-    guard.check("update:comments").unless({ custom: verifyAuthorWithRequest }),
+    guard.check("update:comments").unless({ custom: verifyAuthorWithRequest }).unless({ custom: ensureReactionPayload }),
     checkSchema(commentSchema.POST)],
     async (req, res) => {
         const { reaction, userId, ...additionalData } = req.body
