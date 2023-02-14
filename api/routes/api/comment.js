@@ -237,7 +237,7 @@ router.post('/:objectId',
 */
 
 const message = require('./message')
-router.use('/:objectId/messages', [checkId(), validate()], (req, res, next) => {
+router.use('/:objectId/messages', [checkId(), validate(), presetSessionUserIdIntoBody()], (req, res, next) => {
     req.body.commentId = req.params.objectId
     next()
 }, message)
