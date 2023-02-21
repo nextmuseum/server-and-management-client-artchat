@@ -5,7 +5,7 @@ const router = express.Router()
 const { requireJson, checkSchema, validate } = require(__basedir + '/helper/custom-middleware')
 const { presetSessionUserIdIntoBody, validateInjectAuthUser } = require(__basedir + '/helper/custom-auth-middleware')
 const { getAuthUserByIdSuffix, deleteAuthUserById } = require(__basedir + '/helper/util');
-const guard = require('express-jwt-permissions')()
+const guard = require('express-jwt-permissions')({ requestProperty: 'auth' })
 
 
 const _modelTemplate = require(__basedir + '/models/_modelTemplate')
@@ -17,7 +17,7 @@ const userStore = new _modelTemplate("users")
 */
 
 const verifyUserIsHimself = (req) => {
-    return (req.params.userId == req.user.sub.split('|')[1])
+    return (req.params.userId == req.auth.sub.split('|')[1])
 };
     
 
@@ -29,7 +29,7 @@ const verifyUserIsHimself = (req) => {
 
 router.get('/me/:subroute?',  (req, res) => {
 
-    let authId = req.user.sub.split('|')[1]
+    let authId = req.auth.sub.split('|')[1]
     let subRoute = req.params.subroute || null
     if (subRoute)
         return res.redirect(307, '../' + authId + '/' + ( subRoute || ''))
@@ -38,14 +38,14 @@ router.get('/me/:subroute?',  (req, res) => {
 
 router.post('/me/:subroute', (req, res) => {    
 
-    let authId = req.user.sub.split('|')[1]
+    let authId = req.auth.sub.split('|')[1]
     res.redirect(307, '../' + authId + '/' + req.params.subroute)
 
 })
 
 router.put('/me/:subroute', (req, res) => {    
 
-    let authId = req.user.sub.split('|')[1]
+    let authId = req.auth.sub.split('|')[1]
     res.redirect(307, '../' + authId + '/' + req.params.subroute)
 
 })

@@ -8,12 +8,15 @@ module.exports = defineConfig({
     : '/',
   transpileDependencies: true,
   devServer: {
-	proxy: {
-	  '^/api': {
-		target: 'http://localhost:4000',
-		changeOrigin: true
-	  },
-	}
-  }
+    proxy: {
+      '^/api': {
+      target: 'http://localhost:4000',
+      changeOrigin: true
+      },
+    }
+  },
+  configureWebpack: {
+    mode: 'production'
+  },
 })
 

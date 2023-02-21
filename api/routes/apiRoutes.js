@@ -17,5 +17,7 @@ const report = require('./api/report')
 router.use('/reports', report)
 const user = require('./api/user')
 router.use('/users', user)
+const profanity = require('./api/profanity')
+router.use('/profanity', profanity)
 
 module.exports = router 

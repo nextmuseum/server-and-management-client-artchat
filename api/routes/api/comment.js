@@ -3,15 +3,16 @@ const router = express.Router()
 
 const { requireJson, checkSchema, checkId, validate, checkParameters, parseIdQueryParam } = require(__basedir + '/helper/custom-middleware')
 const { presetSessionUserIdIntoBody } = require(__basedir + '/helper/custom-auth-middleware')
-const guard = require('express-jwt-permissions')()
+const guard = require('express-jwt-permissions')({ requestProperty: 'auth' })
 
 const commentSchema = require(__basedir + '/schemas/comment')
 
 const _modelTemplate = require(__basedir + '/models/_modelTemplate')
 const commentStore = new _modelTemplate("comments")
 
-const { getReports } = require("./report")
+const { getReports, injectReports } = require("./report")
 const { getUserName } = require("./user")
+const { toggleInsertReaction, transformReactions } = require('./components/reactions')
 
 /*
 *   Middleware
@@ -34,6 +35,8 @@ const verifyAuthorWithRequest = async (req) => {
     })
 };
 
+const ensureReactionPayload = async(req) => Object.keys(req.body).every((key) => ['reaction', 'userId'].includes(key))
+
 /*
 *   Routing
 */
@@ -53,7 +56,7 @@ router.put('/',
         if(err) {
             return res.status(500).end()
         } else {
-            res.status(201).set("Content-Type", 'application/json').json(response).end()
+            res.status(201).set("Content-Type", 'application/json').json(response)
         }
     })
 })
@@ -79,7 +82,7 @@ router.get('/', [checkParameters(), validate(), parseIdQueryParam()], async (req
                 res.status(500).end()
                 return
             }
-            else res.status(200).set("Content-Type", 'application/json').json(response).end()
+            else res.status(200).set("Content-Type", 'application/json').json(response)
         })
         return
     }
@@ -99,10 +102,14 @@ router.get('/', [checkParameters(), validate(), parseIdQueryParam()], async (req
             })
         })
     } catch (err) {
-        return res.status(500).json(JSON.stringify(err)).end()
+        return res.status(500).json(JSON.stringify(err))
     }
 
+    // return if no messages
     if(comments && comments.length == 0) return res.status(200).json([])
+
+    // process reactions
+    comments = comments.map(comment => transformReactions(comment, req.body.userId))
 
     // collect message ids 
     let messageIds = comments.reduce((p, c) => {
@@ -133,7 +140,7 @@ router.get('/', [checkParameters(), validate(), parseIdQueryParam()], async (req
 })
 
 
-router.get('/:objectId', [checkId(), validate()], async (req,res) => {
+router.get('/:objectId', [checkId(), validate(), presetSessionUserIdIntoBody()], async (req,res) => {
 
     let objectId = req.params.objectId;
 
@@ -151,14 +158,15 @@ router.get('/:objectId', [checkId(), validate()], async (req,res) => {
             })
         })
     } catch (err) {
-        return res.status(500).json(JSON.stringify(err)).end()
+        return res.status(500).json(JSON.stringify(err))
     }
 
     if(response == null){
         return res.status(404).end()
-    }else{
+    } else {
         let enrichedResponse = await injectReports(response);
-        res.status(200).set("Content-Type", 'application/json').json(enrichedResponse).end()
+        enrichedResponse = transformReactions(enrichedResponse, req.body.userId)
+        res.status(200).set("Content-Type", 'application/json').json(enrichedResponse)
     }
 })
 
@@ -184,31 +192,44 @@ router.post('/:objectId',
     [checkId(),
     validate(),
     presetSessionUserIdIntoBody(),
-    guard.check("update:comments").unless({ custom: verifyAuthorWithRequest }),
+    guard.check("update:comments").unless({ custom: verifyAuthorWithRequest }).unless({ custom: ensureReactionPayload }),
     checkSchema(commentSchema.POST)],
-    async (req,res) => {
+    async (req, res) => {
+        const { reaction, userId, ...additionalData } = req.body
+        const { objectId } = req.params
 
-    commentStore.updateById(req.params.objectId, req.body, (response) => {
-        if(!response){
-            res.status(404).end()
-            return
-        }else{
-            res.status(204).end()
+        if (reaction) {
+            toggleInsertReaction(
+                commentStore,
+                objectId,
+                userId,
+                reaction
+            )
+            .then(() => {
+                if (!additionalData) {
+                    res.status(204).end()
+                }
+            })
+            .catch(() => res.status(500).json({'error': 'failed to set reaction'}))
         }
-    })
-})
+
+        commentStore.updateById(objectId, additionalData, (response, err) => {
+            if(!response){
+                res.status(404).end()
+                return
+            }else{
+                res.status(204).end()
+            }
+        })
+    }
+)
 
 
 /*
 *   Functions
 */
 
-async function injectReports(response) {
-    let reports = await getReports(response._id.toString())
-    let enrichedResponse = Object.assign(response, { "reports": [...reports] })
 
-    return enrichedResponse
-}
 
 
 /*
@@ -216,7 +237,7 @@ async function injectReports(response) {
 */
 
 const message = require('./message')
-router.use('/:objectId/messages', [checkId(), validate()], (req, res, next) => {
+router.use('/:objectId/messages', [checkId(), validate(), presetSessionUserIdIntoBody()], (req, res, next) => {
     req.body.commentId = req.params.objectId
     next()
 }, message)

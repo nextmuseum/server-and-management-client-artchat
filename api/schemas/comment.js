@@ -17,7 +17,8 @@ module.exports = {
                     "y": {"type": "number"},
                     "z": {"type": "number"}
                 },
-                "required" : ["x","y","z"]
+                "required" : ["x","y","z"],
+                "additionalProperties": false
             },
             "rotation":
             {
@@ -29,7 +30,8 @@ module.exports = {
                     "y": {"type": "number"},
                     "z": {"type": "number"}
                 },
-                "required" : ["x","y","z"]
+                "required" : ["x","y","z"],
+                "additionalProperties": false
             }
         },
         "required" : ["text","position","rotation","artworkId","userId"],
@@ -53,7 +55,8 @@ module.exports = {
                     "y": {"type": "number"},
                     "z": {"type": "number"}
                 },
-                "required" : ["x","y","z"]
+                "required" : ["x","y","z"],
+                "additionalProperties": false
             },
             "rotation":
             {
@@ -65,10 +68,23 @@ module.exports = {
                     "y": {"type": "number"},
                     "z": {"type": "number"}
                 },
-                "required" : ["x","y","z"]
-            }
+                "required" : ["x","y","z"],
+                "additionalProperties": false
+            },
+            "reaction": { "type": "string" },
         },
-        "required" : ["text"],
+        "anyOf": [
+            {
+                "required": [
+                    "text"
+                ]
+            },
+            {
+                "required": [
+                    "reaction"
+                ]
+            }
+        ],
         "additionalProperties": false
     }
 }

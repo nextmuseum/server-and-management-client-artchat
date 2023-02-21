@@ -1,0 +1,399 @@
+{
+	"artworks": [
+		{
+			"artist": "Barrazz Home",
+			"title": "Innere Spannung",
+			"description": "Oil on canvas.",
+			"imageSrc": "https://live.staticflickr.com/8524/8586696331_626610da1c_b.jpg",
+			"year": "2017/18",
+			"mapID": 43710,
+			"exhibitionID": "61fb0f25731fa6686c8dd4fe",
+			"date": "2021-03-22T19:06:02.000Z"
+		},
+		{
+			"artist": "Test Feuermelder",
+			"title": "Feuermelder",
+			"description": "Testdescription",
+			"imageSrc": "https://www.nrw-forum.de/imager/www_nrw-forum_de/assets/images/exhibitions/subversives-design-2/Katerina-Kamprani-The-Uncomfortable_chain-fork_02_9c36613ef4a79750f31f87634fb785c3.jpg",
+			"year": "2017/18",
+			"mapID": 37169,
+			"exhibitionID": "61fdca6fbefeaae7f40d6551",
+			"date": "2021-03-22T19:06:02.000Z"
+		},
+		{
+			"artist": "Anselma Murswiek",
+			"title": "The Endless Garden",
+			"description": "Oil on canvas.",
+			"imageSrc": "https://live.staticflickr.com/8524/8586696331_626610da1c_b.jpg",
+			"year": "2017/18",
+			"mapID": 28909,
+			"exhibitionID": "61fb0f25731fa6686c8dd4fe",
+			"date": "2021-03-22T19:06:02.000Z"
+		},
+		{
+			"artist": "Chris Home",
+			"title": "Innere Spannung",
+			"description": "Oil on canvas.",
+			"imageSrc": "https://www.nrw-forum.de/imager/www_nrw-forum_de/assets/images/exhibitions/subversives-design-2/Katerina-Kamprani-The-Uncomfortable_chain-fork_02_9c36613ef4a79750f31f87634fb785c3.jpg",
+			"year": "2017/18",
+			"mapID": 43714,
+			"exhibitionID": "61fdca6fbefeaae7f40d6551",
+			"date": "2021-03-22T19:06:02.000Z"
+		},
+		{
+			"_id": "61fdd35ff7f8535da7b4666b",
+			"artist": "Test Hydrant",
+			"title": "Hydrant",
+			"description": "Testdescription",
+			"imageSrc": "https://www.nrw-forum.de/imager/www_nrw-forum_de/assets/images/exhibitions/subversives-design-2/Katerina-Kamprani-The-Uncomfortable_chain-fork_02_9c36613ef4a79750f31f87634fb785c3.jpg",
+			"year": "2017/18",
+			"mapID": 37170,
+			"exhibitionID": "61fdca6fbefeaae7f40d6551",
+			"date": "2021-03-22T19:06:02.000Z"
+		}
+	],
+	"users": [
+		{
+			"_id": "61fdbb77adb3a4001654a841",
+			"userId": "61fda8c2843805006add7ab9",
+			"date": "2022-02-04T23:49:11.000Z",
+			"activity": [
+				{
+					"exhibitionId": "61fb0f25731fa6686c8dd4fe",
+					"artwork": [
+						"61fb0f6d731fa6686c8e31d1",
+						"61fd24b897686686ee43c87e"
+					]
+				},
+				{
+					"exhibitionId": "61fdca6fbefeaae7f40d6551",
+					"artwork": [
+						"61fdca96befeaae7f40d6552"
+					]
+				}
+			],
+			"userName": "Barazz"
+		},
+		{
+			"_id": "61fdcff1a9c6fb0016fa4bf8",
+			"userId": "115630238369252776976",
+			"date": "2022-02-05T01:16:33.000Z",
+			"userName": "mail.christophvogel"
+		},
+		{
+			"_id": "61fdc992adb3a4001654a842",
+			"userId": "61fd5076c39bdf0069d63f02",
+			"date": "2022-02-05T00:49:22.000Z",
+			"userName": "christophvogel"
+		},
+		{
+			"_id": "62055782c6efc7b1f3c320b2",
+			"userId": "001543.8ae181ba6a7b44d581a5d6a16e1eaa5a.2104",
+			"activity": [
+				{
+					"exhibitionId": "61fb0f25731fa6686c8dd4fe",
+					"artwork": [
+						"61fb0f6d731fa6686c8e31d1"
+					]
+				},
+				{
+					"exhibitionId": "61fdca6fbefeaae7f40d6551",
+					"artwork": [
+						"61fdca96befeaae7f40d6552"
+					]
+				}
+			],
+			"userName": "Alexander"
+		},
+		{
+			"_id": "6206ac07deff960016476ef6",
+			"userName": "jomi9194",
+			"userId": "101823533232337352963",
+			"date": "2022-02-11T18:33:43.000Z",
+			"activity": [
+				{
+					"exhibitionId": "61fb0f25731fa6686c8dd4fe",
+					"artwork": [
+						"61fd24b897686686ee43c87e",
+						"61fb0f6d731fa6686c8e31d1"
+					]
+				}
+			]
+		},
+		{
+			"_id": "6206eceb4cbb6d46fc02304b",
+			"userName": "Alex",
+			"userId": "6206eccdd50637006a5229e8",
+			"date": "2022-02-11T23:10:35.000Z",
+			"activity": [
+				{
+					"exhibitionId": "61fdca6fbefeaae7f40d6551",
+					"artwork": [
+						"61fdca96befeaae7f40d6552"
+					]
+				}
+			]
+		},
+		{
+			"_id": "620e1f06132e560022d371d8",
+			"userName": "c.vogel",
+			"userId": "61fea383641d72007222d479",
+			"date": "2022-02-17T10:10:14.000Z"
+		},
+		{
+			"_id": "6212ab3a22597a0022a8489c",
+			"userName": "Michi",
+			"userId": "000814.dbe23c31622340168d2959a2be235e92.2115",
+			"date": "2022-02-20T20:57:30.000Z"
+		}
+	],
+	"exhibitions": [
+		{
+			"_id": "61fb0f25731fa6686c8dd4fe",
+			"title": "Museum Ulm",
+			"description": "Ausstellung in Ulm",
+			"imageSrc": "https://www.nextmuseum.io/wp-content/uploads/2021/03/Das-schoenste-Bild_2_projects_medium.jpg",
+			"beginning": "23. Juli 2021",
+			"end": "24. Oktober 2021",
+			"museum": "Museum Ulm",
+			"city": "Ulm",
+			"date": "2021-03-22T18:51:55.000Z"
+		},
+		{
+			"_id": "61fdca6fbefeaae7f40d6551",
+			"title": "Subversives Design",
+			"description": "Subversives Design ist kritisches Design. Es verspricht keine direkten Lösungen, sondern stellt den Status quo des klassischen Systems infrage.",
+			"imageSrc": "https://www.nrw-forum.de/imager/www_nrw-forum_de/assets/images/exhibitions/subversives-design-2/Katerina-Kamprani-The-Uncomfortable_chain-fork_02_9c36613ef4a79750f31f87634fb785c3.jpg",
+			"beginning": "11. Februar 2022",
+			"end": "22. Mai 2022",
+			"museum": "NRW Forum Düsseldorf",
+			"city": "Ulm",
+			"date": "2021-03-22T18:51:55.000Z"
+		}
+	],
+	"comments": [
+		{
+			"_id": "61fe6eb3c996169050415c73",
+			"text": "testcomment",
+			"position": {
+				"x": 0,
+				"y": 0,
+				"z": 0
+			},
+			"rotation": {
+				"x": 0,
+				"y": 0,
+				"z": 0
+			},
+			"artworkId": "61fb0f6d731fa6686c8e31d1",
+			"userId": "61e33f41fb3c4b0069ba16de",
+			"userName": "Alexander",
+			"date": "2022-02-05T12:33:55.000Z",
+			"reports": [
+				{
+					"_id": "620ebba7d60e7c76743601a6",
+					"commentId": "61fe6eb3c996169050415c73",
+					"userId": "6206eccdd50637006a5229e8",
+					"userName": "Alex",
+					"date": "2022-02-17T21:18:31.000Z"
+				},
+				{
+					"_id": "621138126c5847f10cd64203",
+					"commentId": "61fe6eb3c996169050415c73",
+					"userId": "61fda8c2843805006add4221",
+					"userName": "(anonym)",
+					"date": "2022-02-19T18:33:54.000Z"
+				},
+				{
+					"_id": "6212a3105c07adc880b9ed80",
+					"commentId": "61fe6eb3c996169050415c73",
+					"userId": "101823533232337352963",
+					"userName": "jomi9194",
+					"date": "2022-02-20T20:22:40.000Z"
+				}
+			]
+		},
+		{
+			"_id": "6200f6d867df990016bf276f",
+			"text": "Hochzeitsgeschenk",
+			"position": {
+				"x": 3.623501777648926,
+				"y": -2.9164345264434814,
+				"z": -5.570579528808594
+			},
+			"rotation": {
+				"x": 48.12559127807617,
+				"y": 197.53878784179688,
+				"z": -6.395306400008849e-7
+			},
+			"artworkId": "61fd24b897686686ee43c87e",
+			"userId": "61fda8c2843805006add7ab9",
+			"userName": "Barazz",
+			"date": "2022-02-07T10:39:20.000Z",
+			"reports": [
+				{
+					"_id": "6206ae35deff960016476ef8",
+					"commentId": "6200f6d867df990016bf276f",
+					"userId": "101823533232337352963",
+					"date": "2022-02-11T18:43:01.000Z"
+				},
+				{
+					"_id": "62097c5c9b6ab1bbecab6e07",
+					"commentId": "6200f6d867df990016bf276f",
+					"userId": "6206eccdd50637006a5229e8",
+					"date": "2022-02-13T21:47:08.000Z"
+				}
+			]
+		},
+		{
+			"_id": "6201a1fd8b944a0016e0a51c",
+			"text": "huhu",
+			"position": {
+				"x": 0,
+				"y": 0,
+				"z": 0
+			},
+			"rotation": {
+				"x": 0,
+				"y": 0,
+				"z": 0
+			},
+			"artworkId": "61fb0f6d731fa6686c8e31d1",
+			"userId": "61e33f41fb3c4b0069ba16de",
+			"userName": "Alexander",
+			"date": "2022-02-07T22:49:33.000Z",
+			"reports": []
+		}
+	],
+	"messages": [
+		{
+			"_id": "61fe7114a7c606582c6cf32d",
+			"text": "Eine Testmessage",
+			"artworkId": "61fd24b897686686ee43c87e",
+			"commentId": "61fb10fd731fa6686c9062a8",
+			"userId": "61e33f41fb3c4b0069ba16de",
+			"date": "2022-02-05T12:44:04.000Z",
+			"userName": "Alexander",
+			"reports": []
+		},
+		{
+			"_id": "61fe6dc57938720016396d5e",
+			"text": "Hi",
+			"artworkId": "61fb0f6d731fa6686c8e31d1",
+			"commentId": "61fe6be25ce68f3098fd2da1",
+			"userId": "61fda8c2843805006add7ab9",
+			"date": "2022-02-05T12:29:57.000Z",
+			"userName": "Barazz",
+			"reports": []
+		},
+		{
+			"_id": "61fdfc656ec55300165f6dcd",
+			"text": "Hallo an alle =)",
+			"artworkId": "61fb0f6d731fa6686c8e31d1",
+			"commentId": "61fb10fd731fa6686c9062a8",
+			"userId": "61fda8c2843805006add7ab9",
+			"date": "2022-02-05T04:26:13.000Z",
+			"userName": "Barazz",
+			"reports": []
+		},
+		{
+			"_id": "61fe701fc0696d69a49f77f6",
+			"text": "Eine Testmessage",
+			"artworkId": "61fd24b897686686ee43c87e",
+			"commentId": "61fb10fd731fa6686c9062a8",
+			"userId": "61e33f41fb3c4b0069ba16de",
+			"userName": "Alexander",
+			"date": "2022-02-05T12:39:59.000Z",
+			"reports": []
+		},
+		{
+			"_id": "6206ae47deff960016476ef9",
+			"text": "huhu",
+			"artworkId": "61fd24b897686686ee43c87e",
+			"commentId": "6200f6d867df990016bf276f",
+			"userId": "101823533232337352963",
+			"userName": "jomi9194",
+			"date": "2022-02-11T18:43:19.000Z",
+			"reports": []
+		},
+		{
+			"_id": "6210dcdbc0b1ced03492e103",
+			"text": "Testmessage",
+			"artworkId": "61fd24b897686686ee43c87e",
+			"commentId": "61fb10fd731fa6686c9062a8",
+			"userId": "61fda8c2843805006add4221",
+			"date": "2022-02-05T12:44:04.000Z",
+			"userName": "(anonym)",
+			"reports": []
+		}
+	],
+	"reports": [
+		{
+			"_id": "61fe6db57938720016396d5d",
+			"commentId": "61fe6d8db7d81fb76c26eb2d",
+			"userId": "61fda8c2843805006add7ab9",
+			"date": "2022-02-05T12:29:41.000Z"
+		},
+		{
+			"_id": "61fdc80c85547d874053963e",
+			"messageId": "61fd38ab99f57e001612d55d",
+			"userId": "61e33f41fb3c4b0069ba16de",
+			"date": "2022-02-05T00:42:52.000Z"
+		},
+		{
+			"_id": "6206ae35deff960016476ef8",
+			"commentId": "6200f6d867df990016bf276f",
+			"userId": "101823533232337352963",
+			"date": "2022-02-11T18:43:01.000Z"
+		},
+		{
+			"_id": "620976819b6ab1bbecab6e06",
+			"commentId": "61fe60b57bd88ca170049394",
+			"userId": "6206eccdd50637006a5229e8",
+			"userName": "Alex",
+			"date": "2022-02-13T21:22:09.000Z"
+		},
+		{
+			"_id": "62097c5c9b6ab1bbecab6e07",
+			"commentId": "6200f6d867df990016bf276f",
+			"userId": "6206eccdd50637006a5229e8",
+			"userName": "Alex",
+			"date": "2022-02-13T21:47:08.000Z"
+		},
+		{
+			"_id": "620c18bb083517e2a84aedf0",
+			"commentId": "620c18ac083517e2a84aedef",
+			"userId": "6206eccdd50637006a5229e8",
+			"userName": "Alex",
+			"date": "2022-02-15T21:18:51.000Z"
+		},
+		{
+			"_id": "620eb8dce0bd2d0022ba5a00",
+			"commentId": "620eb8c7e0bd2d0022ba59ff",
+			"userId": "6206eccdd50637006a5229e8",
+			"userName": "Alex",
+			"date": "2022-02-17T21:06:36.000Z"
+		},
+		{
+			"_id": "620ebba7d60e7c76743601a6",
+			"commentId": "61fe6eb3c996169050415c73",
+			"userId": "6206eccdd50637006a5229e8",
+			"userName": "Alex",
+			"date": "2022-02-17T21:18:31.000Z"
+		},
+		{
+			"_id": "6210dd8fc0b1ced03492e104",
+			"commentId": "61fe6d8db7d81fb76c26eb2d",
+			"userId": "61fda8c2843805006add4221",
+			"date": "2022-02-05T12:29:41.000Z",
+			"userName": "(anonym)"
+		},
+		{
+			"_id": "621138126c5847f10cd64203",
+			"commentId": "61fe6eb3c996169050415c73",
+			"userId": "61fda8c2843805006add4221",
+			"userName": "(anonym)",
+			"date": "2022-02-19T18:33:54.000Z"
+		}
+	]
+ }

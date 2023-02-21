@@ -129,7 +129,5 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-
-
-
+# Deployment directory for static app files to be served from api webserver
 api/app/*

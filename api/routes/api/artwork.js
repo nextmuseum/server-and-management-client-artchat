@@ -1,8 +1,9 @@
 const express = require('express')
+const { presetSessionUserIdIntoBody } = require('../../helper/custom-auth-middleware')
 const router = express.Router()
 
 const { requireJson, checkSchema, checkId, validate, parseIdQueryParam } = require(__basedir + '/helper/custom-middleware')
-const guard = require('express-jwt-permissions')()
+const guard = require('express-jwt-permissions')({ requestProperty: 'auth' })
 
 const artworkSchema = require(__basedir + '/schemas/artwork')
 
@@ -93,7 +94,7 @@ router.delete('/:objectId',
 */
 
 const comment = require('./comment')
-router.use('/:objectId/comments', [checkId(), validate()], (req, res, next) => {
+router.use('/:objectId/comments', [checkId(), validate(), presetSessionUserIdIntoBody()], (req, res, next) => {
     req.body.artworkId = req.params.objectId
     next()
 }, comment)
