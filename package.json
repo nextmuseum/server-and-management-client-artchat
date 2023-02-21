@@ -4,7 +4,7 @@
   "description": "Nextmuseum.io ARt chat API + Management App",
   "main": "",
   "scripts": {
-    "install": "cd ./api && npm install && cd ../app && npm install -g @vue/cli-service && npm install",
+    "install": "cd ./api && npm install && cd ../app && npm install && npm install --only=dev",
     "build": "cd ./app && npm run build",
     "start": "cd ./api && npm start"
   },
